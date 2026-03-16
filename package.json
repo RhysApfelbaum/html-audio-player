@@ -8,5 +8,8 @@
   "license": "ISC",
   "devDependencies": {
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "audiomotion-analyzer": "^4.5.4"
   }
 }
