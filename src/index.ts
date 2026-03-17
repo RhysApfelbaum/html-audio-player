@@ -1,14 +1,21 @@
+import AudioMotionAnalyzer, {
+    type ConstructorOptions,
+} from 'audiomotion-analyzer';
 
-import AudioMotionAnalyzer, { ConstructorOptions as AudioMotionAnalyzerOptions } from 'audiomotion-analyzer';
-
-const soundEffects = {
-    buttonClick: new Audio('../assets/audio/button_click.mp3'),
-    buttonHover: new Audio('../assets/audio/sfx/button_hover.mp3'),
-    diceRoll: new Audio('../assets/audio/sfx/dice_roll.mp3'),
+const asset = (path: string) => {
+    const url = new URL(path, import.meta.url).href;
+    console.log(url);
+    return url;
 };
 
-let hovering = false;
-let hoverTimeout: number | null = null;
+const soundEffects = {
+    buttonClick: new Audio(asset('./assets/audio/button_click.mp3')),
+    buttonHover: new Audio(asset('./assets/audio/button_hover.mp3')),
+    diceRoll: new Audio(asset('./assets/audio/dice_roll.mp3')),
+};
+
+// let hovering = false;
+// let hoverTimeout: number | null = null;
 /**
  * Attaches delayed hover behavior to a DOM element using an options object.
  *
@@ -36,57 +43,78 @@ let hoverTimeout: number | null = null;
  *   callback: () => soundEffects.diceRoll.play()
  * });
  */
-function mouseEnterLeave(options) {
-    const opts = {
-        callback: event => {},
-        hoverTime: 0,
-        ...options
-    };
-
-    opts.element.addEventListener('mouseenter', event => {
-        event.preventDefault();
-        
-        hovering = false;
-
-        hoverTimeout = setTimeout(() => {
-            opts.callback();
-            hovering = true;
-        }, opts.hoverTime);
-    });
-
-    opts.element.addEventListener('mouseleave', event => {
-        event.preventDefault();
-        if (hoverTimeout) {
-            clearTimeout(hoverTimeout);
-            hoverTimeout = null;
-        }
-
-        if (hovering) {
-            opts.callback();
-        }
-    });
-}
+// function mouseEnterLeave(options: any) {
+//     const opts = {
+//         callback: event => {},
+//         hoverTime: 0,
+//         ...options
+//     };
+//
+//     opts.element.addEventListener('mouseenter', event => {
+//         event.preventDefault();
+//
+//         hovering = false;
+//
+//         hoverTimeout = setTimeout(() => {
+//             opts.callback();
+//             hovering = true;
+//         }, opts.hoverTime);
+//     });
+//
+//     opts.element.addEventListener('mouseleave', event => {
+//         event.preventDefault();
+//         if (hoverTimeout) {
+//             clearTimeout(hoverTimeout);
+//             hoverTimeout = null;
+//         }
+//
+//         if (hovering) {
+//             opts.callback();
+//         }
+//     });
+// }
 
 interface MusicPlayerOptions {
+    selector?: string;
+    container?: HTMLElement;
     source?: HTMLMediaElement;
-    visualizerOptions?: AudioMotionAnalyzerOptions;
+    soundEffects?: boolean;
+    visualizerOptions?: ConstructorOptions;
 }
 
-class MusicPlayer extends HTMLElement {
+function exists<T>(value: T | undefined | null) {
+    if (value === undefined || value === null) {
+        throw new Error('Value not set');
+    }
+    return value;
+}
+
+export default class MusicPlayer {
     private audio: HTMLAudioElement;
-    private button: HTMLButtonElement;
-    private reroll: HTMLButtonElement;
+    // private button: HTMLButtonElement;
+    // private reroll: HTMLButtonElement;
     private visualizer: AudioMotionAnalyzer;
+    private root: ShadowRoot;
 
     constructor(options: MusicPlayerOptions) {
-        super();
+        if (!options.container) {
+            const queryResult = document.querySelector<HTMLElement>(
+                options.selector || ''
+            )!;
+            if (!queryResult) {
+                throw new Error(
+                    `MusicPlayer init error:\nThe selector '${options.selector}' returned no results.`
+                );
+            }
+            options.container = queryResult;
+        }
         this.audio = new Audio();
-        this.classList.add('play-something');
-        this.shadowRoot!.innerHTML = `
+        this.root = options.container.attachShadow({ mode: 'open' });
+        this.root.innerHTML = `
             <button class="play-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/></svg>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M176 96C149.5 96 128 117.5 128 144L128 496C128 522.5 149.5 544 176 544L240 544C266.5 544 288 522.5 288 496L288 144C288 117.5 266.5 96 240 96L176 96zM400 96C373.5 96 352 117.5 352 144L352 496C352 522.5 373.5 544 400 544L464 544C490.5 544 512 522.5 512 496L512 144C512 117.5 490.5 96 464 96L400 96z"/></svg>
-                <div class="spectrum"></div>
+                <div id="spectrum"></div>
             </button>
             <span>
                 <button class="random-button">
@@ -95,61 +123,67 @@ class MusicPlayer extends HTMLElement {
                 <a href="#" target="_blank">-</a>
             </span>
         `;
-        this.button = this.querySelector('.play-button')!;
-        this.reroll = this.querySelector('.random-button')!;
-        this.visualizer = new AudioMotionAnalyzer({
-            source: this.audio,
-            showBgColor: false,
-            overlay: true,
-            showScaleX: false,
-            showScaleY: false,
-            radial: true,
-            radius: .8,
-            showPeaks: false,
-            gradient: 'orangered',
-            ...options.visualizerOptions
-        });
-    }
 
-    connectedCallback() {
-        this.button.addEventListener('click', () => this.toggle());
-        this.button.addEventListener('click', () => soundEffects.buttonClick.play());
-        this.reroll.addEventListener('click', () => soundEffects.diceRoll.play());
+        const link = document.createElement('link');
+        link.href = asset('../assets/styles.css');
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        this.root.appendChild(link);
 
-        mouseEnterLeave({
-            element: this.reroll,
-            hoverTime: 100,
-            callback() {
-                soundEffects.diceRoll.play();
+        this.visualizer = new AudioMotionAnalyzer(
+            exists(this.root.getElementById('spectrum')),
+            {
+                source: this.audio,
+                showBgColor: false,
+                overlay: true,
+                showScaleX: false,
+                showScaleY: false,
+                radial: true,
+                radius: 0.8,
+                showPeaks: false,
+                gradient: 'orangered',
+                ...options.visualizerOptions,
             }
-        });
+        );
 
-        mouseEnterLeave({
-            element: this.button,
-            hoverTime: 100,
-            callback() {
-                soundEffects.buttonHover.play();
-            }
-        });
+        // mouseEnterLeave({
+        //     element: this.reroll,
+        //     hoverTime: 100,
+        //     callback() {
+        //         soundEffects.diceRoll.play();
+        //     }
+        // });
+        //
+        // mouseEnterLeave({
+        //     element: this.button,
+        //     hoverTime: 100,
+        //     callback() {
+        //         soundEffects.buttonHover.play();
+        //     }
+        // });
+        // this.button.addEventListener('click', () => this.toggle());
+        //
+        // this.button.addEventListener('click', () => soundEffects.buttonClick.play());
+        // this.reroll.addEventListener('click', () => soundEffects.diceRoll.play());
     }
 
     setTrack(url: string) {
         this.pause();
         this.visualizer.disconnectInput();
-        this.audio = new Audio(url)
+        this.audio = new Audio(url);
         this.visualizer.connectInput(this.audio);
     }
 
     pause() {
         this.audio.pause();
         this.visualizer.stop();
-        this.button.classList.remove('playing');
+        // this.button.classList.remove('playing');
     }
 
     play() {
         this.visualizer.start();
         this.audio.play();
-        this.button.classList.add('playing');
+        // this.button.classList.add('playing');
     }
 
     toggle() {
@@ -161,4 +195,6 @@ class MusicPlayer extends HTMLElement {
     }
 }
 
-customElements.define('music-player', MusicPlayer);
+new MusicPlayer({
+    selector: 'div',
+});

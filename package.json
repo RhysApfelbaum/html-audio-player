@@ -1,15 +1,32 @@
 {
-  "name": "html-audio-player",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "keywords": [],
-  "author": "Rhys Apfelbaum",
-  "license": "ISC",
-  "devDependencies": {
-    "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "audiomotion-analyzer": "^4.5.4"
-  }
+    "name": "html-audio-player",
+    "module": "index.js",
+    "files": [
+        "index.js",
+        "assets/**/*"
+    ],
+    "type": "module",
+    "devDependencies": {
+        "@types/bun": "latest",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.4.0",
+        "prettier": "^3.8.1"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "dependencies": {
+        "audiomotion-analyzer": "^4.5.4"
+    },
+    "lint-staged": {
+        "*": [
+            "prettier --write --ignore-unknown"
+        ]
+    },
+    "scripts": {
+        "build": "bun build ./src/index.ts --outdir ./dist",
+        "dev": "bun ./src/test.html",
+        "format": "bunx prettier . --write",
+        "prepare": "husky"
+    }
 }
