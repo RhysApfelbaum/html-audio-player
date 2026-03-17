@@ -1,16 +1,22 @@
-import { readdir } from 'fs/promises';
+import { Copy, type AssetConfig } from '@alik6/bun-copy-plugin';
 import path from 'path';
 
-const assets = await readdir('./src/assets', {
-    recursive: true,
-    withFileTypes: true,
-});
-Bun.build({
-    entrypoints: [
-        './src/index.ts',
-        ...assets
-            .filter((entry) => entry.isFile())
-            .map((entry) => path.join(entry.parentPath, entry.name)),
-    ],
-    outdir: './dist',
-});
+export async function build(
+    outdir = './dist',
+    extraAssets: AssetConfig[] = []
+) {
+    Bun.build({
+        entrypoints: ['./src/index.ts', './src/styles.css'],
+        outdir,
+        plugins: [
+            Copy({
+                assets: [
+                    { from: './src/assets/', to: path.join(outdir, 'assets') },
+                    ...extraAssets,
+                ],
+                verify: true,
+                verbose: false,
+            }),
+        ],
+    });
+}

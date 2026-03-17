@@ -7,7 +7,9 @@
     ],
     "type": "module",
     "devDependencies": {
+        "@alik6/bun-copy-plugin": "^0.0.10",
         "@types/bun": "latest",
+        "http-server": "^14.1.1",
         "husky": "^9.1.7",
         "lint-staged": "^16.4.0",
         "prettier": "^3.8.1"
@@ -25,7 +27,7 @@
     },
     "scripts": {
         "build": "bun build ./src/index.ts --outdir ./dist",
-        "dev": "bun ./src/test.html",
+        "dev": "bun dev.ts",
         "format": "bunx prettier . --write",
         "prepare": "husky"
     }

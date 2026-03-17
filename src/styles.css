@@ -1,9 +1,8 @@
-.play-something {
+section {
     display: flex;
     flex-direction: column;
     justify-content: end;
     align-items: center;
-    padding: 4rem 1rem;
     min-height: 0;
 
     span {
@@ -52,12 +51,13 @@
                 }
             }
 
-            .spectrum {
+            #spectrum {
                 position: absolute;
                 top: -50%;
                 left: -50%;
                 width: 200%;
                 height: 200%;
+                pointer-events: none;
 
                 /* janky colour conversion */
                 filter: brightness(0) saturate(100%) invert(65%) sepia(5%)
@@ -70,7 +70,7 @@
             svg {
                 transition: all 0.3s;
                 width: 2rem;
-                fill: var(--blue);
+                fill: blue;
             }
 
             margin-right: 1rem;
@@ -78,7 +78,7 @@
             &:hover {
                 svg {
                     transform: translateY(-0.5rem) rotate(360deg) scale(1.2);
-                    fill: var(--highlight);
+                    fill: yellow;
                 }
             }
         }

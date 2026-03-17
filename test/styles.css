@@ -1,0 +1,79 @@
+/* src/styles.css */
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    min-height: 0;
+}
+
+section span {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+section button {
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+section button.play-button {
+    position: relative;
+    height: 5rem;
+}
+
+section button.play-button.playing > :first-child {
+    display: none;
+}
+
+section button.play-button.playing > :nth-child(2) {
+    display: block;
+}
+
+section button.play-button > :nth-child(2) {
+    display: none;
+}
+
+section button.play-button svg {
+    fill: var(--blue);
+    width: 5rem;
+    transition: all 0.3s;
+}
+
+section button.play-button:hover svg {
+    fill: var(--highlight);
+    transform: scale(1.2);
+}
+
+section button.play-button #spectrum {
+    position: absolute;
+    pointer-events: none;
+    filter: brightness(0) saturate(100%) invert(65%) sepia(5%) saturate(4028%)
+        hue-rotate(198deg) brightness(74%) contrast(99%);
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+}
+
+section button.random-button {
+    margin-right: 1rem;
+}
+
+section button.random-button svg {
+    fill: blue;
+    width: 2rem;
+    transition: all 0.3s;
+}
+
+section button.random-button:hover svg {
+    fill: yellow;
+    transform: translateY(-0.5rem) rotate(360deg) scale(1.2);
+}
