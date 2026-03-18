@@ -6,8 +6,13 @@
         <div></div>
         <script type="module">
             import MusicPlayer from './index.js';
+            const audio = new Audio('https://radio-sudd.radiocult.fm/stream');
+            audio.crossOrigin = 'anonymous';
             const player = new MusicPlayer({
                 selector: 'div',
+                state: {
+                    source: audio,
+                },
             });
         </script>
     </body>

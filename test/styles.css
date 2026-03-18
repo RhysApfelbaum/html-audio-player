@@ -1,5 +1,8 @@
 /* src/styles.css */
 section {
+    --foreground: black;
+    --background: white;
+    --highlight: red;
     display: flex;
     flex-direction: column;
     justify-content: end;
@@ -42,7 +45,7 @@ section button.play-button > :nth-child(2) {
 }
 
 section button.play-button svg {
-    fill: var(--blue);
+    fill: var(--foreground);
     width: 5rem;
     transition: all 0.3s;
 }
@@ -68,12 +71,12 @@ section button.random-button {
 }
 
 section button.random-button svg {
-    fill: blue;
+    fill: var(--foreground);
     width: 2rem;
     transition: all 0.3s;
 }
 
 section button.random-button:hover svg {
-    fill: yellow;
+    fill: var(--highlight);
     transform: translateY(-0.5rem) rotate(360deg) scale(1.2);
 }

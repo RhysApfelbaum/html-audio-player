@@ -1,4 +1,7 @@
 section {
+    --foreground: black;
+    --background: white;
+    --highlight: red;
     display: flex;
     flex-direction: column;
     justify-content: end;
@@ -40,7 +43,7 @@ section {
 
             svg {
                 width: 5rem;
-                fill: var(--blue);
+                fill: var(--foreground);
                 transition: all 0.3s;
             }
 
@@ -70,7 +73,7 @@ section {
             svg {
                 transition: all 0.3s;
                 width: 2rem;
-                fill: blue;
+                fill: var(--foreground);
             }
 
             margin-right: 1rem;
@@ -78,7 +81,7 @@ section {
             &:hover {
                 svg {
                     transform: translateY(-0.5rem) rotate(360deg) scale(1.2);
-                    fill: yellow;
+                    fill: var(--highlight);
                 }
             }
         }

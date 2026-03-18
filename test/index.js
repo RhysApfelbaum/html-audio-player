@@ -2536,6 +2536,11 @@ class MusicPlayer {
     state;
     root;
     constructor(options) {
+        this.state = {
+            ...DEFAULT_MUSIC_PLAYER_STATE,
+            ...options.state,
+        };
+        this.state.source.addEventListener('ended', () => this.pause());
         if (!options.container) {
             const queryResult = document.querySelector(options.selector || '');
             if (!queryResult) {
@@ -2544,11 +2549,6 @@ The selector '${options.selector}' returned no results.`);
             }
             options.container = queryResult;
         }
-        this.state = {
-            ...DEFAULT_MUSIC_PLAYER_STATE,
-            ...options.state,
-        };
-        this.state.source.addEventListener('ended', () => this.pause());
         this.root = options.container.attachShadow({ mode: 'open' });
         const section = document.createElement('section');
         section.style.visibility = 'hidden';
@@ -2564,7 +2564,18 @@ The selector '${options.selector}' returned no results.`);
                     <button class="random-button">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 160C544 124.7 515.3 96 480 96L160 96zM224 192C241.7 192 256 206.3 256 224C256 241.7 241.7 256 224 256C206.3 256 192 241.7 192 224C192 206.3 206.3 192 224 192zM192 416C192 398.3 206.3 384 224 384C241.7 384 256 398.3 256 416C256 433.7 241.7 448 224 448C206.3 448 192 433.7 192 416zM320 288C337.7 288 352 302.3 352 320C352 337.7 337.7 352 320 352C302.3 352 288 337.7 288 320C288 302.3 302.3 288 320 288zM384 224C384 206.3 398.3 192 416 192C433.7 192 448 206.3 448 224C448 241.7 433.7 256 416 256C398.3 256 384 241.7 384 224zM416 384C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448C398.3 448 384 433.7 384 416C384 398.3 398.3 384 416 384z"/></svg>
                     </button>
-                    <a href="#" target="_blank">testeasdfasfd</a>
+                    <!-- <a href="#" target="_blank">testeasdfasfd</a> -->
+                </span>
+                <span>
+                    <p id="current-time">0:00</p>
+                    <input type="range" id="seek" value="0">
+                    <p id="total-time">0:00</p>
+                </span>
+                <span>
+                    <button>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 160C544 124.7 515.3 96 480 96L160 96zM224 192C241.7 192 256 206.3 256 224C256 241.7 241.7 256 224 256C206.3 256 192 241.7 192 224C192 206.3 206.3 192 224 192zM192 416C192 398.3 206.3 384 224 384C241.7 384 256 398.3 256 416C256 433.7 241.7 448 224 448C206.3 448 192 433.7 192 416zM320 288C337.7 288 352 302.3 352 320C352 337.7 337.7 352 320 352C302.3 352 288 337.7 288 320C288 302.3 302.3 288 320 288zM384 224C384 206.3 398.3 192 416 192C433.7 192 448 206.3 448 224C448 241.7 433.7 256 416 256C398.3 256 384 241.7 384 224zM416 384C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448C398.3 448 384 433.7 384 416C384 398.3 398.3 384 416 384z"/></svg>
+                    </button>
+                    <input type="range" id="volume" value="80">
                 </span>
             </section>
         `;
@@ -2572,6 +2583,9 @@ The selector '${options.selector}' returned no results.`);
         link.href = asset('./styles.css');
         link.type = 'text/css';
         link.rel = 'stylesheet';
+        Object.entries(options.colors || {}).forEach(([key, value]) => {
+            section.style.setProperty(`--${key}`, value);
+        });
         this.root.appendChild(link);
         this.root.appendChild(section);
         link.addEventListener('load', () => {
@@ -2592,6 +2606,19 @@ The selector '${options.selector}' returned no results.`);
                 ...options.visualizerOptions,
             }
         );
+        const seekBar = exists(this.root.querySelector('#seek'));
+        this.state.source.addEventListener('loadedmetadata', () => {
+            exists(this.root.querySelector('#total-time')).innerHTML =
+                this.clockDisplay(this.state.source.duration);
+        });
+        this.state.source.addEventListener('timeupdate', (event) => {
+            seekBar.valueAsNumber = this.state.source.currentTime;
+            this.updateSeekBar(this.state.source.currentTime);
+        });
+        seekBar.addEventListener('input', (event) => {
+            this.state.source.currentTime = seekBar.valueAsNumber;
+            this.updateSeekBar(seekBar.valueAsNumber);
+        });
         this.playPause = exists(this.root.querySelector('.play-button'));
         this.playPause.addEventListener('click', () => this.toggle());
         this.playPause.addEventListener('click', () =>
@@ -2616,7 +2643,7 @@ The selector '${options.selector}' returned no results.`);
             },
         });
     }
-    update(newState) {
+    updateState(newState) {
         this.pause();
         this.visualizer.disconnectInput();
         this.state = {
@@ -2625,8 +2652,22 @@ The selector '${options.selector}' returned no results.`);
         };
         this.visualizer.connectInput(this.state.source);
     }
+    updateSeekBar(seconds) {
+        console.log('hi');
+        const currentTime = exists(this.root.querySelector('#current-time'));
+        currentTime.innerHTML = this.clockDisplay(seconds);
+    }
+    clockDisplay(seconds) {
+        if (!Number.isFinite(seconds)) {
+            return '--:--';
+        }
+        const secondDisplay = Math.floor(seconds % 60)
+            .toString()
+            .padStart(2, '0');
+        const minuteDisplay = Math.floor(seconds / 60).toString();
+        return minuteDisplay + ':' + secondDisplay;
+    }
     pause() {
-        console.log('pausing');
         this.state.source.pause();
         this.playPause.classList.remove('playing');
     }
