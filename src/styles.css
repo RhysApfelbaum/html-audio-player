@@ -10,6 +10,8 @@ section {
     background-color: var(--background);
     border-radius: 1rem;
     padding: 1rem;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: bold;
 
     span {
         display: flex;
@@ -51,13 +53,16 @@ section {
         input {
             width: 100%;
         }
+        p {
+            margin: 0 1rem;
+        }
     }
 
-    div.slider {
-        appearance: none;
-    }
+    /* div.slider { */
+    /*     appearance: none; */
+    /* } */
 
-    div.slider {
+    .slider {
         margin: 0;
         padding: 0;
         position: relative;
@@ -66,16 +71,20 @@ section {
             -webkit-appearance: none;
             appearance: none;
             cursor: pointer;
-            --slider-thumb-background: var(--foreground);
-            background: transparent;
-            position: relative;
+            --slider-thumb-background: grey;
+            background: grey;
+            border-radius: 1rem;
+            overflow: hidden;
+            height: 0.3rem;
+            display: flex;
 
             &::-webkit-slider-thumb {
+                appearance: none;
                 -webkit-appearance: none;
-                width: 0.2rem;
-                background: var(--slider-thumb-background);
-                height: 1rem;
-                border-radius: 2px;
+                height: 100%;
+                width: 0;
+                box-shadow: -100vw 0 0 100vw var(--foreground);
+                border: none;
             }
 
             &::-webkit-slider-runnable-track {
@@ -87,29 +96,12 @@ section {
             }
 
             &::-moz-range-thumb {
-                -moz-appearance: none transparent;
-                -moz-transform: none;
-                width: 0.2rem;
-                background: var(--slider-thumb-background);
-                height: 0.8rem;
-                border-radius: 2px;
-                position: relative;
-                z-index: 100;
+                height: 100%;
+                width: 0;
+                box-shadow: -100vw 0 0 100vw var(--foreground);
                 border: none;
             }
         }
-    }
-
-    div.slider-track {
-        position: absolute;
-        background-color: var(--foreground);
-        width: 100%;
-        height: 0.2rem;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-        border-radius: 0.2rem;
-        border: none;
     }
 
     button {
@@ -124,7 +116,7 @@ section {
         &.volume-button {
             svg {
                 transition: all 0.3s;
-                width: 1rem;
+                width: 2rem;
                 fill: var(--foreground);
             }
         }

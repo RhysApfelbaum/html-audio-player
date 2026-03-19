@@ -68,6 +68,13 @@ export default class MusicPlayer {
         }
 
         this.root = options.container.attachShadow({ mode: 'open' });
+        this.root.innerHTML = `
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet"
+
+`;
+
         const section = document.createElement('section');
         section.style.visibility = 'hidden';
         section.innerHTML = `
@@ -77,7 +84,7 @@ export default class MusicPlayer {
                 </button>
                 <div class="slider">
                     <input type="range" id="volume" value="80">
-                    <div class="slider-track"></div>
+                    <!-- <div class="slider-track"></div> -->
                 </div>
             </span>
             <button class="play-button">
@@ -94,7 +101,7 @@ export default class MusicPlayer {
                 <p id="current-time">0:00</p>
                 <div class="slider">
                     <input type="range" id="seek" value="0">
-                    <div class="slider-track"></div>
+                    <!-- <div class="slider-track"></div> -->
                 </div>
                 <p id="total-time">0:00</p>
             </span>
@@ -173,7 +180,7 @@ export default class MusicPlayer {
 
         this.state.source.addEventListener('loadedmetadata', () => {
             if (!Number.isFinite(this.state.source.duration)) {
-                seekBar.setAttribute('disabled', 'true');
+                // seekBar.setAttribute('disabled', 'true');
                 seekBar.style.cursor = 'not-allowed';
             }
             exists(this.root.querySelector('#total-time')).innerHTML =

@@ -1,82 +1,181 @@
 /* src/styles.css */
 section {
-    --foreground: black;
-    --background: white;
-    --highlight: red;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-    align-items: center;
-    min-height: 0;
+  --foreground: #201154;
+  --background: #dcbb58;
+  --highlight: #6c4343;
+  display: flex;
+  background-color: var(--background);
+  border-radius: 1rem;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items:  center;
+  min-height: 0;
+  padding: 1rem;
+  font-family: Open Sans, sans-serif;
+  font-weight: bold;
 }
 
 section span {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    margin-top: 2rem;
+  display: flex;
+  justify-content: space-evenly;
+  align-items:  center;
+}
+
+section #volume-controls .slider {
+  visibility: hidden;
+  transition: all .3s ease-in-out;
+}
+
+section #volume-controls #volume {
+  visibility: hidden;
+  width: 0;
+  transition: all .3s ease-in-out;
+}
+
+section #volume-controls:hover .slider {
+  visibility: visible;
+}
+
+section #volume-controls:hover #volume {
+  opacity: 1;
+  visibility: visible;
+  width: 5rem;
+}
+
+section #volume-controls.visible .slider {
+  visibility: visible;
+}
+
+section #volume-controls.visible #volume {
+  opacity: 1;
+  visibility: visible;
+  width: 5rem;
+}
+
+section #time-controls {
+  width: 100%;
+}
+
+section #time-controls div.slider {
+  width: 100%;
+}
+
+section #time-controls input {
+  width: 100%;
+}
+
+section #time-controls p {
+  margin: 0 1rem;
+}
+
+section .slider {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+section .slider input {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  --slider-thumb-background: grey;
+  overflow: hidden;
+  display: flex;
+  background: gray;
+  border-radius: 1rem;
+  height: .3rem;
+}
+
+section .slider input::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: -100vw 0 0 100vw var(--foreground);
+  border: none;
+  width: 0;
+  height: 100%;
+}
+
+section .slider input::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+}
+
+section .slider input::-moz-range-track {
+  -moz-appearance: none;
+}
+
+section .slider input::-moz-range-thumb {
+  box-shadow: -100vw 0 0 100vw var(--foreground);
+  border: none;
+  width: 0;
+  height: 100%;
 }
 
 section button {
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-    outline: inherit;
-    background: none;
-    border: none;
-    padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+section button.volume-button svg {
+  fill: var(--foreground);
+  width: 2rem;
+  transition: all .3s;
 }
 
 section button.play-button {
-    position: relative;
-    height: 5rem;
+  position: relative;
+  height: 5rem;
+  margin: 2rem;
 }
 
 section button.play-button.playing > :first-child {
-    display: none;
+  display: none;
 }
 
 section button.play-button.playing > :nth-child(2) {
-    display: block;
+  display: block;
 }
 
 section button.play-button > :nth-child(2) {
-    display: none;
+  display: none;
 }
 
 section button.play-button svg {
-    fill: var(--foreground);
-    width: 5rem;
-    transition: all 0.3s;
+  fill: var(--foreground);
+  width: 5rem;
+  transition: all .3s;
 }
 
 section button.play-button:hover svg {
-    fill: var(--highlight);
-    transform: scale(1.2);
+  fill: var(--highlight);
+  transform: scale(1.2);
 }
 
 section button.play-button #spectrum {
-    position: absolute;
-    pointer-events: none;
-    filter: brightness(0) saturate(100%) invert(65%) sepia(5%) saturate(4028%)
-        hue-rotate(198deg) brightness(74%) contrast(99%);
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
+  position: absolute;
+  pointer-events: none;
+  filter: brightness(0) saturate(100%) invert(65%) sepia(5%) saturate(4028%) hue-rotate(198deg) brightness(74%) contrast(99%);
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
 }
 
 section button.random-button {
-    margin-right: 1rem;
+  margin-right: 1rem;
 }
 
 section button.random-button svg {
-    fill: var(--foreground);
-    width: 2rem;
-    transition: all 0.3s;
+  fill: var(--foreground);
+  width: 2rem;
+  transition: all .3s;
 }
 
 section button.random-button:hover svg {
-    fill: var(--highlight);
-    transform: translateY(-0.5rem) rotate(360deg) scale(1.2);
+  fill: var(--highlight);
+  transform: translateY(-.5rem)rotate(360deg)scale(1.2);
 }
