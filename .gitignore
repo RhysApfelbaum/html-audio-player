@@ -155,4 +155,4 @@ devenv.lock
 
 
 # Test build
-test
+test/
