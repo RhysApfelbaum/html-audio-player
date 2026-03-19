@@ -18,18 +18,98 @@ section {
     }
 
     #volume-controls {
+        .slider {
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
         #volume {
             width: 0;
             visibility: hidden;
             transition: all 0.3s ease-in-out;
         }
-        &:hover {
+
+        &:hover,
+        &.visible {
+            .slider {
+                visibility: visible;
+            }
             #volume {
                 width: 5rem;
                 opacity: 100%;
                 visibility: visible;
             }
         }
+    }
+
+    #time-controls {
+        width: 100%;
+
+        div.slider {
+            width: 100%;
+        }
+
+        input {
+            width: 100%;
+        }
+    }
+
+    div.slider {
+        appearance: none;
+    }
+
+    div.slider {
+        margin: 0;
+        padding: 0;
+        position: relative;
+
+        input {
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            --slider-thumb-background: var(--foreground);
+            background: transparent;
+            position: relative;
+
+            &::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 0.2rem;
+                background: var(--slider-thumb-background);
+                height: 1rem;
+                border-radius: 2px;
+            }
+
+            &::-webkit-slider-runnable-track {
+                -webkit-appearance: none;
+            }
+
+            &::-moz-range-track {
+                -moz-appearance: none;
+            }
+
+            &::-moz-range-thumb {
+                -moz-appearance: none transparent;
+                -moz-transform: none;
+                width: 0.2rem;
+                background: var(--slider-thumb-background);
+                height: 0.8rem;
+                border-radius: 2px;
+                position: relative;
+                z-index: 100;
+                border: none;
+            }
+        }
+    }
+
+    div.slider-track {
+        position: absolute;
+        background-color: var(--foreground);
+        width: 100%;
+        height: 0.2rem;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        border-radius: 0.2rem;
+        border: none;
     }
 
     button {

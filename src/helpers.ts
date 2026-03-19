@@ -47,3 +47,7 @@ export function exists<T>(value: T | undefined | null) {
     }
     return value;
 }
+
+export function entries<T extends object>(object: T) {
+    return Object.entries(object) as any as [keyof T, T[keyof T]][];
+}
