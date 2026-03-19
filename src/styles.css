@@ -1,15 +1,17 @@
 section {
-    --foreground: black;
-    --background: white;
-    --highlight: red;
+    --foreground: #201154;
+    --background: #dcbb58;
+    --highlight: #6c4343;
     display: flex;
-    flex-direction: column;
-    justify-content: end;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
     min-height: 0;
+    background-color: var(--background);
+    border-radius: 1rem;
+    padding: 1rem;
 
     span {
-        margin-top: 2rem;
         display: flex;
         align-items: center;
         justify-content: space-evenly;
@@ -24,8 +26,17 @@ section {
         cursor: pointer;
         outline: inherit;
 
+        &.volume-button {
+            svg {
+                transition: all 0.3s;
+                width: 1rem;
+                fill: var(--foreground);
+            }
+        }
+
         &.play-button {
             height: 5rem;
+            margin: 1rem;
             position: relative;
             &.playing {
                 > :nth-child(1) {
