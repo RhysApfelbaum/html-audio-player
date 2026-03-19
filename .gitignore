@@ -152,3 +152,7 @@ devenv.lock
 
 # pre-commit
 .pre-commit-config.yaml
+
+
+# Test build
+test
