@@ -3,7 +3,7 @@ section {
     --background: #dcbb58;
     --highlight: #6c4343;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
     min-height: 0;
@@ -15,6 +15,16 @@ section {
         display: flex;
         align-items: center;
         justify-content: space-evenly;
+    }
+
+    #volume.hidden {
+        width: 0;
+        visibility: hidden;
+    }
+
+    #volume {
+        transition: all 0.3s ease-in-out;
+        width: 5rem;
     }
 
     button {
@@ -36,7 +46,7 @@ section {
 
         &.play-button {
             height: 5rem;
-            margin: 1rem;
+            margin: 2rem;
             position: relative;
             &.playing {
                 > :nth-child(1) {
