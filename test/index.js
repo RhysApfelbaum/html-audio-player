@@ -1,3 +1,2409 @@
+var __create = Object.create;
+var __getProtoOf = Object.getPrototypeOf;
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+function __accessProp(key) {
+  return this[key];
+}
+var __toESMCache_node;
+var __toESMCache_esm;
+var __toESM = (mod, isNodeMode, target) => {
+  var canCache = mod != null && typeof mod === "object";
+  if (canCache) {
+    var cache = isNodeMode ? __toESMCache_node ??= new WeakMap : __toESMCache_esm ??= new WeakMap;
+    var cached = cache.get(mod);
+    if (cached)
+      return cached;
+  }
+  target = mod != null ? __create(__getProtoOf(mod)) : {};
+  const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
+  for (let key of __getOwnPropNames(mod))
+    if (!__hasOwnProp.call(to, key))
+      __defProp(to, key, {
+        get: __accessProp.bind(mod, key),
+        enumerable: true
+      });
+  if (canCache)
+    cache.set(mod, to);
+  return to;
+};
+var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
+var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
+  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
+}) : x)(function(x) {
+  if (typeof require !== "undefined")
+    return require.apply(this, arguments);
+  throw Error('Dynamic require of "' + x + '" is not supported');
+});
+
+// node_modules/css-filter-converter/lib/shared/consts/errors.js
+var require_errors = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.MUST_INSTALL_PUPPETEER = exports.DEFAULT_CONVERSION_ERROR_MESSAGE = exports.UNEXPECTED_ERROR_MESSAGE_INTRODUCTION = exports.UNEXPECTED_ERROR_MESSAGE_LINK = exports.UNEXPECTED_ERROR_MESSAGE_PREFIX = undefined;
+  exports.UNEXPECTED_ERROR_MESSAGE_PREFIX = "Unexpected error has occurred, please report this by using the following link: ";
+  exports.UNEXPECTED_ERROR_MESSAGE_LINK = "https://github.com/OvidijusParsiunas/css-filter-converter/issues/new";
+  exports.UNEXPECTED_ERROR_MESSAGE_INTRODUCTION = exports.UNEXPECTED_ERROR_MESSAGE_PREFIX + exports.UNEXPECTED_ERROR_MESSAGE_LINK;
+  exports.DEFAULT_CONVERSION_ERROR_MESSAGE = "Input value is invalid";
+  exports.MUST_INSTALL_PUPPETEER = "To convert filter values to color in Node - you will first need to install 'puppeteer' by running:" + ` 
+ npm install puppeteer`;
+});
+
+// node_modules/css-filter-converter/lib/shared/functionality/errorHandling/errorHandling.js
+var require_errorHandling = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.ErrorHandling = undefined;
+  var errors_1 = require_errors();
+
+  class ErrorHandling {
+    static generateErrorResult(message) {
+      return { color: null, error: { message } };
+    }
+    static generateInputErrorMessage(colorType, colorString, format) {
+      const errorPrefix = `Input ${colorType} color string could not be parsed.`;
+      const actualStringReceived = `String received: ${colorString}.`;
+      const messageStrings = [errorPrefix, actualStringReceived];
+      if (format) {
+        const expectedFormat = `Expected format: ${format}.`;
+        messageStrings.splice(1, 0, expectedFormat);
+      }
+      return messageStrings.join(" ");
+    }
+    static generateUnexpectedError(error) {
+      const errorMessage = `${errors_1.UNEXPECTED_ERROR_MESSAGE_INTRODUCTION}: 
+${error.message}`;
+      return ErrorHandling.generateErrorResult(errorMessage);
+    }
+    static hasError(param) {
+      return !!param.errorMessage;
+    }
+  }
+  exports.ErrorHandling = ErrorHandling;
+});
+
+// node_modules/css-filter-converter/lib/shared/functionality/sheen/sheenUtil.js
+var require_sheenUtil = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.SheenUtil = undefined;
+
+  class SheenUtil {
+    static parseSheenFromOptions(options) {
+      if (options) {
+        if (typeof options.sheen === "boolean")
+          return options.sheen;
+      }
+      return true;
+    }
+  }
+  exports.SheenUtil = SheenUtil;
+  SheenUtil.SHEEN_FILTER_PREFIX = "brightness(0) saturate(100%)";
+});
+
+// node_modules/css-filter-converter/lib/shared/consts/colorTypes.js
+var require_colorTypes = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.ColorTypes = undefined;
+  var ColorTypes;
+  (function(ColorTypes2) {
+    ColorTypes2["HEX"] = "hex";
+    ColorTypes2["RGB"] = "rgb";
+    ColorTypes2["HSL"] = "hsl";
+    ColorTypes2["KEYWORD"] = "keyword";
+    ColorTypes2["FILTER"] = "filter";
+  })(ColorTypes = exports.ColorTypes || (exports.ColorTypes = {}));
+});
+
+// node_modules/css-filter-converter/lib/colorToFilter/rgbToFilter/rgbColor.js
+var require_rgbColor = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.RgbColor = undefined;
+
+  class RgbColor {
+    constructor(rgb = [0, 0, 0]) {
+      this.r = this.clamp(rgb[0]);
+      this.g = this.clamp(rgb[1]);
+      this.b = this.clamp(rgb[2]);
+    }
+    clamp(value) {
+      if (value > 255) {
+        value = 255;
+      } else if (value < 0) {
+        value = 0;
+      }
+      return value;
+    }
+    setRgb(r, g, b) {
+      this.r = this.clamp(r);
+      this.g = this.clamp(g);
+      this.b = this.clamp(b);
+    }
+    multiply(matrix) {
+      const newR = this.clamp(this.r * matrix[0] + this.g * matrix[1] + this.b * matrix[2]);
+      const newG = this.clamp(this.r * matrix[3] + this.g * matrix[4] + this.b * matrix[5]);
+      const newB = this.clamp(this.r * matrix[6] + this.g * matrix[7] + this.b * matrix[8]);
+      this.r = newR;
+      this.g = newG;
+      this.b = newB;
+    }
+    hueRotate(angle = 0) {
+      angle = angle / 180 * Math.PI;
+      const sin = Math.sin(angle);
+      const cos = Math.cos(angle);
+      this.multiply([
+        0.213 + cos * 0.787 - sin * 0.213,
+        0.715 - cos * 0.715 - sin * 0.715,
+        0.072 - cos * 0.072 + sin * 0.928,
+        0.213 - cos * 0.213 + sin * 0.143,
+        0.715 + cos * 0.285 + sin * 0.14,
+        0.072 - cos * 0.072 - sin * 0.283,
+        0.213 - cos * 0.213 - sin * 0.787,
+        0.715 - cos * 0.715 + sin * 0.715,
+        0.072 + cos * 0.928 + sin * 0.072
+      ]);
+    }
+    sepia(value = 1) {
+      this.multiply([
+        0.393 + 0.607 * (1 - value),
+        0.769 - 0.769 * (1 - value),
+        0.189 - 0.189 * (1 - value),
+        0.349 - 0.349 * (1 - value),
+        0.686 + 0.314 * (1 - value),
+        0.168 - 0.168 * (1 - value),
+        0.272 - 0.272 * (1 - value),
+        0.534 - 0.534 * (1 - value),
+        0.131 + 0.869 * (1 - value)
+      ]);
+    }
+    saturate(value = 1) {
+      this.multiply([
+        0.213 + 0.787 * value,
+        0.715 - 0.715 * value,
+        0.072 - 0.072 * value,
+        0.213 - 0.213 * value,
+        0.715 + 0.285 * value,
+        0.072 - 0.072 * value,
+        0.213 - 0.213 * value,
+        0.715 - 0.715 * value,
+        0.072 + 0.928 * value
+      ]);
+    }
+    linear(slope = 1, intercept = 0) {
+      this.r = this.clamp(this.r * slope + intercept * 255);
+      this.g = this.clamp(this.g * slope + intercept * 255);
+      this.b = this.clamp(this.b * slope + intercept * 255);
+    }
+    brightness(value = 1) {
+      this.linear(value);
+    }
+    contrast(value = 1) {
+      this.linear(value, -(0.5 * value) + 0.5);
+    }
+    invert(value = 1) {
+      this.r = this.clamp((value + this.r / 255 * (1 - 2 * value)) * 255);
+      this.g = this.clamp((value + this.g / 255 * (1 - 2 * value)) * 255);
+      this.b = this.clamp((value + this.b / 255 * (1 - 2 * value)) * 255);
+    }
+  }
+  exports.RgbColor = RgbColor;
+});
+
+// node_modules/css-filter-converter/lib/colorToFilter/rgbToFilter/rgbToFilterWorker.js
+var require_rgbToFilterWorker = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.RgbToFilterWorker = undefined;
+  var sheenUtil_1 = require_sheenUtil();
+  var rgbColor_1 = require_rgbColor();
+
+  class RgbToFilterWorker {
+    constructor(targetRgbColor, addSheen) {
+      this.targetRgbColor = targetRgbColor;
+      this.reusedRgbColor = new rgbColor_1.RgbColor;
+      this.addSheen = addSheen;
+    }
+    static fmt(filters, idx, multiplier = 1) {
+      return Math.round(filters[idx] * multiplier);
+    }
+    generateCss(filters) {
+      const prefix = this.addSheen ? `${sheenUtil_1.SheenUtil.SHEEN_FILTER_PREFIX} ` : "";
+      return `${prefix}invert(${RgbToFilterWorker.fmt(filters, 0)}%) sepia(${RgbToFilterWorker.fmt(filters, 1)}%) saturate(${RgbToFilterWorker.fmt(filters, 2)}%) hue-rotate(${RgbToFilterWorker.fmt(filters, 3, 3.6)}deg) brightness(${RgbToFilterWorker.fmt(filters, 4)}%) contrast(${RgbToFilterWorker.fmt(filters, 5)}%)`;
+    }
+    loss(filters) {
+      this.reusedRgbColor.setRgb(0, 0, 0);
+      this.reusedRgbColor.invert(filters[0] / 100);
+      this.reusedRgbColor.sepia(filters[1] / 100);
+      this.reusedRgbColor.saturate(filters[2] / 100);
+      this.reusedRgbColor.hueRotate(filters[3] * 3.6);
+      this.reusedRgbColor.brightness(filters[4] / 100);
+      this.reusedRgbColor.contrast(filters[5] / 100);
+      return Math.abs(this.reusedRgbColor.r - this.targetRgbColor.r) + Math.abs(this.reusedRgbColor.g - this.targetRgbColor.g) + Math.abs(this.reusedRgbColor.b - this.targetRgbColor.b);
+    }
+    static fixSpsa(value, idx) {
+      let max = 100;
+      if (idx === 2) {
+        max = 7500;
+      } else if (idx === 4 || idx === 5) {
+        max = 200;
+      }
+      if (idx === 3) {
+        if (value > max) {
+          value %= max;
+        } else if (value < 0) {
+          value = max + value % max;
+        }
+      } else if (value < 0) {
+        value = 0;
+      } else if (value > max) {
+        value = max;
+      }
+      return value;
+    }
+    spsa(A, a, c, values, iters) {
+      const alpha = 1;
+      const gamma = 0.16666666666666666;
+      let best = [];
+      let bestLoss = Infinity;
+      const deltas = new Array(6);
+      const highArgs = new Array(6);
+      const lowArgs = new Array(6);
+      for (let k = 0;k < iters; k += 1) {
+        const ck = c / Math.pow(k + 1, gamma);
+        for (let i = 0;i < 6; i += 1) {
+          deltas[i] = Math.random() > 0.5 ? 1 : -1;
+          highArgs[i] = values[i] + ck * deltas[i];
+          lowArgs[i] = values[i] - ck * deltas[i];
+        }
+        const lossDiff = this.loss(highArgs) - this.loss(lowArgs);
+        for (let i = 0;i < 6; i += 1) {
+          const g = lossDiff / (2 * ck) * deltas[i];
+          const ak = a[i] / Math.pow(A + k + 1, alpha);
+          values[i] = RgbToFilterWorker.fixSpsa(values[i] - ak * g, i);
+        }
+        const loss = this.loss(values);
+        if (loss < bestLoss) {
+          best = values.slice(0);
+          bestLoss = loss;
+        }
+      }
+      return { values: best, loss: bestLoss };
+    }
+    solveNarrow(wide) {
+      const A = wide.loss;
+      const c = 2;
+      const A1 = A + 1;
+      const a = [0.25 * A1, 0.25 * A1, A1, 0.25 * A1, 0.2 * A1, 0.2 * A1];
+      return this.spsa(A, a, c, wide.values, 500);
+    }
+    solveWide() {
+      const A = 5;
+      const c = 15;
+      const a = [60, 180, 18000, 600, 1.2, 1.2];
+      let best = { values: [], loss: Infinity };
+      for (let i = 0;best.loss > 25 && i < 3; i += 1) {
+        const initial = [50, 20, 3750, 50, 100, 100];
+        const result = this.spsa(A, a, c, initial, 1000);
+        if (result.loss < best.loss) {
+          best = result;
+        }
+      }
+      return best;
+    }
+    convert() {
+      const result = this.solveNarrow(this.solveWide());
+      return {
+        loss: result.loss,
+        color: this.generateCss(result.values)
+      };
+    }
+  }
+  exports.RgbToFilterWorker = RgbToFilterWorker;
+});
+
+// node_modules/css-filter-converter/lib/colorToFilter/rgbToFilter/rgbToFilter.js
+var require_rgbToFilter = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.RgbToFilter = undefined;
+  var errorHandling_1 = require_errorHandling();
+  var errors_1 = require_errors();
+  var rgbToFilterWorker_1 = require_rgbToFilterWorker();
+  var rgbColor_1 = require_rgbColor();
+
+  class RgbToFilter {
+    static generateConversionError(conversionErrorMessage) {
+      const errorMessage = conversionErrorMessage || errors_1.DEFAULT_CONVERSION_ERROR_MESSAGE;
+      return errorHandling_1.ErrorHandling.generateErrorResult(errorMessage);
+    }
+    static generateValidateAndParseError(errorMessage) {
+      return errorHandling_1.ErrorHandling.generateErrorResult(errorMessage);
+    }
+    static execute(rgb, addSheen) {
+      const rgbColor = new rgbColor_1.RgbColor(rgb);
+      const rgbToFilter = new rgbToFilterWorker_1.RgbToFilterWorker(rgbColor, addSheen);
+      return rgbToFilter.convert();
+    }
+    static convertToRGB(parseResultColor, convertToRgb) {
+      if (parseResultColor && convertToRgb) {
+        return convertToRgb(parseResultColor);
+      }
+      return null;
+    }
+    static convert(conversionProps) {
+      try {
+        const { colorString, validateAndParse, convertToRgb, conversionErrorMessage, addSheen } = conversionProps;
+        const trimmedString = colorString.trim().toLocaleLowerCase();
+        const parseResult = (validateAndParse === null || validateAndParse === undefined ? undefined : validateAndParse(trimmedString)) || { color: trimmedString };
+        if (errorHandling_1.ErrorHandling.hasError(parseResult))
+          return RgbToFilter.generateValidateAndParseError(parseResult.errorMessage);
+        const rgbColor = RgbToFilter.convertToRGB(parseResult.color, convertToRgb) || parseResult.color;
+        if (!rgbColor)
+          return RgbToFilter.generateConversionError(conversionErrorMessage);
+        return RgbToFilter.execute(rgbColor, addSheen);
+      } catch (error) {
+        return errorHandling_1.ErrorHandling.generateUnexpectedError(error);
+      }
+    }
+  }
+  exports.RgbToFilter = RgbToFilter;
+});
+
+// node_modules/css-filter-converter/lib/shared/consts/regex.js
+var require_regex = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.MATCH_HEXADECIMAL = exports.MATCH_INTEGER_AND_FLOAT_NUMBERS = undefined;
+  exports.MATCH_INTEGER_AND_FLOAT_NUMBERS = /(-?\d+(?:\.\d+)?)/g;
+  exports.MATCH_HEXADECIMAL = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
+});
+
+// node_modules/css-filter-converter/lib/shared/consts/inputLimits.js
+var require_inputLimits = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.MAX_COLOR_INPUT_STRING_LENGTH = undefined;
+  exports.MAX_COLOR_INPUT_STRING_LENGTH = 25;
+});
+
+// node_modules/css-filter-converter/lib/shared/consts/colorFormats.js
+var require_colorFormats = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.ColorFormats = undefined;
+  var ColorFormats;
+  (function(ColorFormats2) {
+    ColorFormats2["HEX"] = "#ffffff or #fff";
+    ColorFormats2["RGB"] = "rgb([0-255], [0-255], [0-255]) or rgb([0-255], [0-255], [0-255], [0-1]) or rgb([0-100%], [0-100%], [0-100%]) or rgb([0-100%], [0-100%], [0-100%], [0-100%]) or [0-255], [0-255], [0-255] or [0-255] [0-255] [0-255]";
+    ColorFormats2["HSL"] = "hsl([0-360], [0-100], [0-100]) or hsl([0-360], [0-100%], [0-100%]) or [0-360], [0-100], [0-100] or [0-360] [0-100] [0-100]";
+    ColorFormats2["FILTER"] = "blur(), brightness(), contrast(), drop-shadow(), grayscale(), hue-rotate(), invert(), saturate(), sepia() with each parameter populated with %, px or deg where approriate e.g. contrast(101%)";
+    ColorFormats2["KEYWORD"] = "Generic color string. See the following link for all available colors: https://github.com/colorjs/color-name/blob/master/index.js";
+  })(ColorFormats = exports.ColorFormats || (exports.ColorFormats = {}));
+});
+
+// node_modules/color-name/index.js
+var require_color_name = __commonJS((exports, module) => {
+  module.exports = {
+    aliceblue: [240, 248, 255],
+    antiquewhite: [250, 235, 215],
+    aqua: [0, 255, 255],
+    aquamarine: [127, 255, 212],
+    azure: [240, 255, 255],
+    beige: [245, 245, 220],
+    bisque: [255, 228, 196],
+    black: [0, 0, 0],
+    blanchedalmond: [255, 235, 205],
+    blue: [0, 0, 255],
+    blueviolet: [138, 43, 226],
+    brown: [165, 42, 42],
+    burlywood: [222, 184, 135],
+    cadetblue: [95, 158, 160],
+    chartreuse: [127, 255, 0],
+    chocolate: [210, 105, 30],
+    coral: [255, 127, 80],
+    cornflowerblue: [100, 149, 237],
+    cornsilk: [255, 248, 220],
+    crimson: [220, 20, 60],
+    cyan: [0, 255, 255],
+    darkblue: [0, 0, 139],
+    darkcyan: [0, 139, 139],
+    darkgoldenrod: [184, 134, 11],
+    darkgray: [169, 169, 169],
+    darkgreen: [0, 100, 0],
+    darkgrey: [169, 169, 169],
+    darkkhaki: [189, 183, 107],
+    darkmagenta: [139, 0, 139],
+    darkolivegreen: [85, 107, 47],
+    darkorange: [255, 140, 0],
+    darkorchid: [153, 50, 204],
+    darkred: [139, 0, 0],
+    darksalmon: [233, 150, 122],
+    darkseagreen: [143, 188, 143],
+    darkslateblue: [72, 61, 139],
+    darkslategray: [47, 79, 79],
+    darkslategrey: [47, 79, 79],
+    darkturquoise: [0, 206, 209],
+    darkviolet: [148, 0, 211],
+    deeppink: [255, 20, 147],
+    deepskyblue: [0, 191, 255],
+    dimgray: [105, 105, 105],
+    dimgrey: [105, 105, 105],
+    dodgerblue: [30, 144, 255],
+    firebrick: [178, 34, 34],
+    floralwhite: [255, 250, 240],
+    forestgreen: [34, 139, 34],
+    fuchsia: [255, 0, 255],
+    gainsboro: [220, 220, 220],
+    ghostwhite: [248, 248, 255],
+    gold: [255, 215, 0],
+    goldenrod: [218, 165, 32],
+    gray: [128, 128, 128],
+    green: [0, 128, 0],
+    greenyellow: [173, 255, 47],
+    grey: [128, 128, 128],
+    honeydew: [240, 255, 240],
+    hotpink: [255, 105, 180],
+    indianred: [205, 92, 92],
+    indigo: [75, 0, 130],
+    ivory: [255, 255, 240],
+    khaki: [240, 230, 140],
+    lavender: [230, 230, 250],
+    lavenderblush: [255, 240, 245],
+    lawngreen: [124, 252, 0],
+    lemonchiffon: [255, 250, 205],
+    lightblue: [173, 216, 230],
+    lightcoral: [240, 128, 128],
+    lightcyan: [224, 255, 255],
+    lightgoldenrodyellow: [250, 250, 210],
+    lightgray: [211, 211, 211],
+    lightgreen: [144, 238, 144],
+    lightgrey: [211, 211, 211],
+    lightpink: [255, 182, 193],
+    lightsalmon: [255, 160, 122],
+    lightseagreen: [32, 178, 170],
+    lightskyblue: [135, 206, 250],
+    lightslategray: [119, 136, 153],
+    lightslategrey: [119, 136, 153],
+    lightsteelblue: [176, 196, 222],
+    lightyellow: [255, 255, 224],
+    lime: [0, 255, 0],
+    limegreen: [50, 205, 50],
+    linen: [250, 240, 230],
+    magenta: [255, 0, 255],
+    maroon: [128, 0, 0],
+    mediumaquamarine: [102, 205, 170],
+    mediumblue: [0, 0, 205],
+    mediumorchid: [186, 85, 211],
+    mediumpurple: [147, 112, 219],
+    mediumseagreen: [60, 179, 113],
+    mediumslateblue: [123, 104, 238],
+    mediumspringgreen: [0, 250, 154],
+    mediumturquoise: [72, 209, 204],
+    mediumvioletred: [199, 21, 133],
+    midnightblue: [25, 25, 112],
+    mintcream: [245, 255, 250],
+    mistyrose: [255, 228, 225],
+    moccasin: [255, 228, 181],
+    navajowhite: [255, 222, 173],
+    navy: [0, 0, 128],
+    oldlace: [253, 245, 230],
+    olive: [128, 128, 0],
+    olivedrab: [107, 142, 35],
+    orange: [255, 165, 0],
+    orangered: [255, 69, 0],
+    orchid: [218, 112, 214],
+    palegoldenrod: [238, 232, 170],
+    palegreen: [152, 251, 152],
+    paleturquoise: [175, 238, 238],
+    palevioletred: [219, 112, 147],
+    papayawhip: [255, 239, 213],
+    peachpuff: [255, 218, 185],
+    peru: [205, 133, 63],
+    pink: [255, 192, 203],
+    plum: [221, 160, 221],
+    powderblue: [176, 224, 230],
+    purple: [128, 0, 128],
+    rebeccapurple: [102, 51, 153],
+    red: [255, 0, 0],
+    rosybrown: [188, 143, 143],
+    royalblue: [65, 105, 225],
+    saddlebrown: [139, 69, 19],
+    salmon: [250, 128, 114],
+    sandybrown: [244, 164, 96],
+    seagreen: [46, 139, 87],
+    seashell: [255, 245, 238],
+    sienna: [160, 82, 45],
+    silver: [192, 192, 192],
+    skyblue: [135, 206, 235],
+    slateblue: [106, 90, 205],
+    slategray: [112, 128, 144],
+    slategrey: [112, 128, 144],
+    snow: [255, 250, 250],
+    springgreen: [0, 255, 127],
+    steelblue: [70, 130, 180],
+    tan: [210, 180, 140],
+    teal: [0, 128, 128],
+    thistle: [216, 191, 216],
+    tomato: [255, 99, 71],
+    turquoise: [64, 224, 208],
+    violet: [238, 130, 238],
+    wheat: [245, 222, 179],
+    white: [255, 255, 255],
+    whitesmoke: [245, 245, 245],
+    yellow: [255, 255, 0],
+    yellowgreen: [154, 205, 50]
+  };
+});
+
+// node_modules/css-filter-converter/lib/colorToFilter/colorParser/colorParser.js
+var require_colorParser = __commonJS((exports) => {
+  var __importDefault = exports && exports.__importDefault || function(mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.ColorParser = undefined;
+  var regex_1 = require_regex();
+  var errorHandling_1 = require_errorHandling();
+  var inputLimits_1 = require_inputLimits();
+  var colorFormats_1 = require_colorFormats();
+  var colorTypes_1 = require_colorTypes();
+  var color_name_1 = __importDefault(require_color_name());
+
+  class ColorParser {
+    static validateAndParseHex(hexString) {
+      if (hexString.length < inputLimits_1.MAX_COLOR_INPUT_STRING_LENGTH) {
+        const isValid = hexString.match(regex_1.MATCH_HEXADECIMAL);
+        if (isValid)
+          return { color: hexString };
+      }
+      return { errorMessage: errorHandling_1.ErrorHandling.generateInputErrorMessage(colorTypes_1.ColorTypes.HEX, hexString, colorFormats_1.ColorFormats.HEX) };
+    }
+    static parseFirstThreeIntegersFromString(color) {
+      if (color.length < inputLimits_1.MAX_COLOR_INPUT_STRING_LENGTH) {
+        const regexResult = color.match(regex_1.MATCH_INTEGER_AND_FLOAT_NUMBERS);
+        regex_1.MATCH_INTEGER_AND_FLOAT_NUMBERS.lastIndex = 0;
+        if (regexResult && regexResult.length >= 3) {
+          return regexResult.slice(0, 3).map((numberString) => Number.parseInt(numberString));
+        }
+      }
+      return null;
+    }
+    static validateAndParseRgb(rgbString) {
+      const rgb = ColorParser.parseFirstThreeIntegersFromString(rgbString);
+      if (rgb && rgb[0] >= 0 && rgb[0] <= 255 && rgb[1] >= 0 && rgb[1] <= 255 && rgb[2] >= 0 && rgb[2] <= 255) {
+        return { color: rgb };
+      }
+      return { errorMessage: errorHandling_1.ErrorHandling.generateInputErrorMessage(colorTypes_1.ColorTypes.RGB, rgbString, colorFormats_1.ColorFormats.RGB) };
+    }
+    static validateAndParseHsl(hslString) {
+      const hsl = ColorParser.parseFirstThreeIntegersFromString(hslString);
+      if (hsl && hsl[0] >= 0 && hsl[0] <= 360 && hsl[1] >= 0 && hsl[1] <= 100 && hsl[2] >= 0 && hsl[2] <= 100) {
+        return { color: hsl };
+      }
+      return { errorMessage: errorHandling_1.ErrorHandling.generateInputErrorMessage(colorTypes_1.ColorTypes.HSL, hslString, colorFormats_1.ColorFormats.HSL) };
+    }
+    static validateAndParseKeyword(keyword) {
+      if (keyword.length < inputLimits_1.MAX_COLOR_INPUT_STRING_LENGTH) {
+        const isValid = color_name_1.default[keyword];
+        if (isValid)
+          return { color: keyword };
+      }
+      return { errorMessage: errorHandling_1.ErrorHandling.generateInputErrorMessage(colorTypes_1.ColorTypes.KEYWORD, keyword, colorFormats_1.ColorFormats.KEYWORD) };
+    }
+  }
+  exports.ColorParser = ColorParser;
+});
+
+// node_modules/color-convert/conversions.js
+var require_conversions = __commonJS((exports, module) => {
+  var cssKeywords = require_color_name();
+  var reverseKeywords = {};
+  for (const key of Object.keys(cssKeywords)) {
+    reverseKeywords[cssKeywords[key]] = key;
+  }
+  var convert = {
+    rgb: { channels: 3, labels: "rgb" },
+    hsl: { channels: 3, labels: "hsl" },
+    hsv: { channels: 3, labels: "hsv" },
+    hwb: { channels: 3, labels: "hwb" },
+    cmyk: { channels: 4, labels: "cmyk" },
+    xyz: { channels: 3, labels: "xyz" },
+    lab: { channels: 3, labels: "lab" },
+    lch: { channels: 3, labels: "lch" },
+    hex: { channels: 1, labels: ["hex"] },
+    keyword: { channels: 1, labels: ["keyword"] },
+    ansi16: { channels: 1, labels: ["ansi16"] },
+    ansi256: { channels: 1, labels: ["ansi256"] },
+    hcg: { channels: 3, labels: ["h", "c", "g"] },
+    apple: { channels: 3, labels: ["r16", "g16", "b16"] },
+    gray: { channels: 1, labels: ["gray"] }
+  };
+  module.exports = convert;
+  for (const model of Object.keys(convert)) {
+    if (!("channels" in convert[model])) {
+      throw new Error("missing channels property: " + model);
+    }
+    if (!("labels" in convert[model])) {
+      throw new Error("missing channel labels property: " + model);
+    }
+    if (convert[model].labels.length !== convert[model].channels) {
+      throw new Error("channel and label counts mismatch: " + model);
+    }
+    const { channels, labels } = convert[model];
+    delete convert[model].channels;
+    delete convert[model].labels;
+    Object.defineProperty(convert[model], "channels", { value: channels });
+    Object.defineProperty(convert[model], "labels", { value: labels });
+  }
+  convert.rgb.hsl = function(rgb) {
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
+    const min = Math.min(r, g, b);
+    const max = Math.max(r, g, b);
+    const delta = max - min;
+    let h;
+    let s;
+    if (max === min) {
+      h = 0;
+    } else if (r === max) {
+      h = (g - b) / delta;
+    } else if (g === max) {
+      h = 2 + (b - r) / delta;
+    } else if (b === max) {
+      h = 4 + (r - g) / delta;
+    }
+    h = Math.min(h * 60, 360);
+    if (h < 0) {
+      h += 360;
+    }
+    const l = (min + max) / 2;
+    if (max === min) {
+      s = 0;
+    } else if (l <= 0.5) {
+      s = delta / (max + min);
+    } else {
+      s = delta / (2 - max - min);
+    }
+    return [h, s * 100, l * 100];
+  };
+  convert.rgb.hsv = function(rgb) {
+    let rdif;
+    let gdif;
+    let bdif;
+    let h;
+    let s;
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
+    const v = Math.max(r, g, b);
+    const diff = v - Math.min(r, g, b);
+    const diffc = function(c) {
+      return (v - c) / 6 / diff + 1 / 2;
+    };
+    if (diff === 0) {
+      h = 0;
+      s = 0;
+    } else {
+      s = diff / v;
+      rdif = diffc(r);
+      gdif = diffc(g);
+      bdif = diffc(b);
+      if (r === v) {
+        h = bdif - gdif;
+      } else if (g === v) {
+        h = 1 / 3 + rdif - bdif;
+      } else if (b === v) {
+        h = 2 / 3 + gdif - rdif;
+      }
+      if (h < 0) {
+        h += 1;
+      } else if (h > 1) {
+        h -= 1;
+      }
+    }
+    return [
+      h * 360,
+      s * 100,
+      v * 100
+    ];
+  };
+  convert.rgb.hwb = function(rgb) {
+    const r = rgb[0];
+    const g = rgb[1];
+    let b = rgb[2];
+    const h = convert.rgb.hsl(rgb)[0];
+    const w = 1 / 255 * Math.min(r, Math.min(g, b));
+    b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
+    return [h, w * 100, b * 100];
+  };
+  convert.rgb.cmyk = function(rgb) {
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
+    const k = Math.min(1 - r, 1 - g, 1 - b);
+    const c = (1 - r - k) / (1 - k) || 0;
+    const m = (1 - g - k) / (1 - k) || 0;
+    const y = (1 - b - k) / (1 - k) || 0;
+    return [c * 100, m * 100, y * 100, k * 100];
+  };
+  function comparativeDistance(x, y) {
+    return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
+  }
+  convert.rgb.keyword = function(rgb) {
+    const reversed = reverseKeywords[rgb];
+    if (reversed) {
+      return reversed;
+    }
+    let currentClosestDistance = Infinity;
+    let currentClosestKeyword;
+    for (const keyword of Object.keys(cssKeywords)) {
+      const value = cssKeywords[keyword];
+      const distance = comparativeDistance(rgb, value);
+      if (distance < currentClosestDistance) {
+        currentClosestDistance = distance;
+        currentClosestKeyword = keyword;
+      }
+    }
+    return currentClosestKeyword;
+  };
+  convert.keyword.rgb = function(keyword) {
+    return cssKeywords[keyword];
+  };
+  convert.rgb.xyz = function(rgb) {
+    let r = rgb[0] / 255;
+    let g = rgb[1] / 255;
+    let b = rgb[2] / 255;
+    r = r > 0.04045 ? ((r + 0.055) / 1.055) ** 2.4 : r / 12.92;
+    g = g > 0.04045 ? ((g + 0.055) / 1.055) ** 2.4 : g / 12.92;
+    b = b > 0.04045 ? ((b + 0.055) / 1.055) ** 2.4 : b / 12.92;
+    const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
+    const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+    const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
+    return [x * 100, y * 100, z * 100];
+  };
+  convert.rgb.lab = function(rgb) {
+    const xyz = convert.rgb.xyz(rgb);
+    let x = xyz[0];
+    let y = xyz[1];
+    let z = xyz[2];
+    x /= 95.047;
+    y /= 100;
+    z /= 108.883;
+    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
+    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
+    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
+    const l = 116 * y - 16;
+    const a = 500 * (x - y);
+    const b = 200 * (y - z);
+    return [l, a, b];
+  };
+  convert.hsl.rgb = function(hsl) {
+    const h = hsl[0] / 360;
+    const s = hsl[1] / 100;
+    const l = hsl[2] / 100;
+    let t2;
+    let t3;
+    let val;
+    if (s === 0) {
+      val = l * 255;
+      return [val, val, val];
+    }
+    if (l < 0.5) {
+      t2 = l * (1 + s);
+    } else {
+      t2 = l + s - l * s;
+    }
+    const t1 = 2 * l - t2;
+    const rgb = [0, 0, 0];
+    for (let i = 0;i < 3; i++) {
+      t3 = h + 1 / 3 * -(i - 1);
+      if (t3 < 0) {
+        t3++;
+      }
+      if (t3 > 1) {
+        t3--;
+      }
+      if (6 * t3 < 1) {
+        val = t1 + (t2 - t1) * 6 * t3;
+      } else if (2 * t3 < 1) {
+        val = t2;
+      } else if (3 * t3 < 2) {
+        val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
+      } else {
+        val = t1;
+      }
+      rgb[i] = val * 255;
+    }
+    return rgb;
+  };
+  convert.hsl.hsv = function(hsl) {
+    const h = hsl[0];
+    let s = hsl[1] / 100;
+    let l = hsl[2] / 100;
+    let smin = s;
+    const lmin = Math.max(l, 0.01);
+    l *= 2;
+    s *= l <= 1 ? l : 2 - l;
+    smin *= lmin <= 1 ? lmin : 2 - lmin;
+    const v = (l + s) / 2;
+    const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
+    return [h, sv * 100, v * 100];
+  };
+  convert.hsv.rgb = function(hsv) {
+    const h = hsv[0] / 60;
+    const s = hsv[1] / 100;
+    let v = hsv[2] / 100;
+    const hi = Math.floor(h) % 6;
+    const f = h - Math.floor(h);
+    const p = 255 * v * (1 - s);
+    const q = 255 * v * (1 - s * f);
+    const t = 255 * v * (1 - s * (1 - f));
+    v *= 255;
+    switch (hi) {
+      case 0:
+        return [v, t, p];
+      case 1:
+        return [q, v, p];
+      case 2:
+        return [p, v, t];
+      case 3:
+        return [p, q, v];
+      case 4:
+        return [t, p, v];
+      case 5:
+        return [v, p, q];
+    }
+  };
+  convert.hsv.hsl = function(hsv) {
+    const h = hsv[0];
+    const s = hsv[1] / 100;
+    const v = hsv[2] / 100;
+    const vmin = Math.max(v, 0.01);
+    let sl;
+    let l;
+    l = (2 - s) * v;
+    const lmin = (2 - s) * vmin;
+    sl = s * vmin;
+    sl /= lmin <= 1 ? lmin : 2 - lmin;
+    sl = sl || 0;
+    l /= 2;
+    return [h, sl * 100, l * 100];
+  };
+  convert.hwb.rgb = function(hwb) {
+    const h = hwb[0] / 360;
+    let wh = hwb[1] / 100;
+    let bl = hwb[2] / 100;
+    const ratio = wh + bl;
+    let f;
+    if (ratio > 1) {
+      wh /= ratio;
+      bl /= ratio;
+    }
+    const i = Math.floor(6 * h);
+    const v = 1 - bl;
+    f = 6 * h - i;
+    if ((i & 1) !== 0) {
+      f = 1 - f;
+    }
+    const n = wh + f * (v - wh);
+    let r;
+    let g;
+    let b;
+    switch (i) {
+      default:
+      case 6:
+      case 0:
+        r = v;
+        g = n;
+        b = wh;
+        break;
+      case 1:
+        r = n;
+        g = v;
+        b = wh;
+        break;
+      case 2:
+        r = wh;
+        g = v;
+        b = n;
+        break;
+      case 3:
+        r = wh;
+        g = n;
+        b = v;
+        break;
+      case 4:
+        r = n;
+        g = wh;
+        b = v;
+        break;
+      case 5:
+        r = v;
+        g = wh;
+        b = n;
+        break;
+    }
+    return [r * 255, g * 255, b * 255];
+  };
+  convert.cmyk.rgb = function(cmyk) {
+    const c = cmyk[0] / 100;
+    const m = cmyk[1] / 100;
+    const y = cmyk[2] / 100;
+    const k = cmyk[3] / 100;
+    const r = 1 - Math.min(1, c * (1 - k) + k);
+    const g = 1 - Math.min(1, m * (1 - k) + k);
+    const b = 1 - Math.min(1, y * (1 - k) + k);
+    return [r * 255, g * 255, b * 255];
+  };
+  convert.xyz.rgb = function(xyz) {
+    const x = xyz[0] / 100;
+    const y = xyz[1] / 100;
+    const z = xyz[2] / 100;
+    let r;
+    let g;
+    let b;
+    r = x * 3.2406 + y * -1.5372 + z * -0.4986;
+    g = x * -0.9689 + y * 1.8758 + z * 0.0415;
+    b = x * 0.0557 + y * -0.204 + z * 1.057;
+    r = r > 0.0031308 ? 1.055 * r ** (1 / 2.4) - 0.055 : r * 12.92;
+    g = g > 0.0031308 ? 1.055 * g ** (1 / 2.4) - 0.055 : g * 12.92;
+    b = b > 0.0031308 ? 1.055 * b ** (1 / 2.4) - 0.055 : b * 12.92;
+    r = Math.min(Math.max(0, r), 1);
+    g = Math.min(Math.max(0, g), 1);
+    b = Math.min(Math.max(0, b), 1);
+    return [r * 255, g * 255, b * 255];
+  };
+  convert.xyz.lab = function(xyz) {
+    let x = xyz[0];
+    let y = xyz[1];
+    let z = xyz[2];
+    x /= 95.047;
+    y /= 100;
+    z /= 108.883;
+    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
+    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
+    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
+    const l = 116 * y - 16;
+    const a = 500 * (x - y);
+    const b = 200 * (y - z);
+    return [l, a, b];
+  };
+  convert.lab.xyz = function(lab) {
+    const l = lab[0];
+    const a = lab[1];
+    const b = lab[2];
+    let x;
+    let y;
+    let z;
+    y = (l + 16) / 116;
+    x = a / 500 + y;
+    z = y - b / 200;
+    const y2 = y ** 3;
+    const x2 = x ** 3;
+    const z2 = z ** 3;
+    y = y2 > 0.008856 ? y2 : (y - 16 / 116) / 7.787;
+    x = x2 > 0.008856 ? x2 : (x - 16 / 116) / 7.787;
+    z = z2 > 0.008856 ? z2 : (z - 16 / 116) / 7.787;
+    x *= 95.047;
+    y *= 100;
+    z *= 108.883;
+    return [x, y, z];
+  };
+  convert.lab.lch = function(lab) {
+    const l = lab[0];
+    const a = lab[1];
+    const b = lab[2];
+    let h;
+    const hr = Math.atan2(b, a);
+    h = hr * 360 / 2 / Math.PI;
+    if (h < 0) {
+      h += 360;
+    }
+    const c = Math.sqrt(a * a + b * b);
+    return [l, c, h];
+  };
+  convert.lch.lab = function(lch) {
+    const l = lch[0];
+    const c = lch[1];
+    const h = lch[2];
+    const hr = h / 360 * 2 * Math.PI;
+    const a = c * Math.cos(hr);
+    const b = c * Math.sin(hr);
+    return [l, a, b];
+  };
+  convert.rgb.ansi16 = function(args, saturation = null) {
+    const [r, g, b] = args;
+    let value = saturation === null ? convert.rgb.hsv(args)[2] : saturation;
+    value = Math.round(value / 50);
+    if (value === 0) {
+      return 30;
+    }
+    let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
+    if (value === 2) {
+      ansi += 60;
+    }
+    return ansi;
+  };
+  convert.hsv.ansi16 = function(args) {
+    return convert.rgb.ansi16(convert.hsv.rgb(args), args[2]);
+  };
+  convert.rgb.ansi256 = function(args) {
+    const r = args[0];
+    const g = args[1];
+    const b = args[2];
+    if (r === g && g === b) {
+      if (r < 8) {
+        return 16;
+      }
+      if (r > 248) {
+        return 231;
+      }
+      return Math.round((r - 8) / 247 * 24) + 232;
+    }
+    const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
+    return ansi;
+  };
+  convert.ansi16.rgb = function(args) {
+    let color = args % 10;
+    if (color === 0 || color === 7) {
+      if (args > 50) {
+        color += 3.5;
+      }
+      color = color / 10.5 * 255;
+      return [color, color, color];
+    }
+    const mult = (~~(args > 50) + 1) * 0.5;
+    const r = (color & 1) * mult * 255;
+    const g = (color >> 1 & 1) * mult * 255;
+    const b = (color >> 2 & 1) * mult * 255;
+    return [r, g, b];
+  };
+  convert.ansi256.rgb = function(args) {
+    if (args >= 232) {
+      const c = (args - 232) * 10 + 8;
+      return [c, c, c];
+    }
+    args -= 16;
+    let rem;
+    const r = Math.floor(args / 36) / 5 * 255;
+    const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
+    const b = rem % 6 / 5 * 255;
+    return [r, g, b];
+  };
+  convert.rgb.hex = function(args) {
+    const integer = ((Math.round(args[0]) & 255) << 16) + ((Math.round(args[1]) & 255) << 8) + (Math.round(args[2]) & 255);
+    const string = integer.toString(16).toUpperCase();
+    return "000000".substring(string.length) + string;
+  };
+  convert.hex.rgb = function(args) {
+    const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
+    if (!match) {
+      return [0, 0, 0];
+    }
+    let colorString = match[0];
+    if (match[0].length === 3) {
+      colorString = colorString.split("").map((char) => {
+        return char + char;
+      }).join("");
+    }
+    const integer = parseInt(colorString, 16);
+    const r = integer >> 16 & 255;
+    const g = integer >> 8 & 255;
+    const b = integer & 255;
+    return [r, g, b];
+  };
+  convert.rgb.hcg = function(rgb) {
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
+    const max = Math.max(Math.max(r, g), b);
+    const min = Math.min(Math.min(r, g), b);
+    const chroma = max - min;
+    let grayscale;
+    let hue;
+    if (chroma < 1) {
+      grayscale = min / (1 - chroma);
+    } else {
+      grayscale = 0;
+    }
+    if (chroma <= 0) {
+      hue = 0;
+    } else if (max === r) {
+      hue = (g - b) / chroma % 6;
+    } else if (max === g) {
+      hue = 2 + (b - r) / chroma;
+    } else {
+      hue = 4 + (r - g) / chroma;
+    }
+    hue /= 6;
+    hue %= 1;
+    return [hue * 360, chroma * 100, grayscale * 100];
+  };
+  convert.hsl.hcg = function(hsl) {
+    const s = hsl[1] / 100;
+    const l = hsl[2] / 100;
+    const c = l < 0.5 ? 2 * s * l : 2 * s * (1 - l);
+    let f = 0;
+    if (c < 1) {
+      f = (l - 0.5 * c) / (1 - c);
+    }
+    return [hsl[0], c * 100, f * 100];
+  };
+  convert.hsv.hcg = function(hsv) {
+    const s = hsv[1] / 100;
+    const v = hsv[2] / 100;
+    const c = s * v;
+    let f = 0;
+    if (c < 1) {
+      f = (v - c) / (1 - c);
+    }
+    return [hsv[0], c * 100, f * 100];
+  };
+  convert.hcg.rgb = function(hcg) {
+    const h = hcg[0] / 360;
+    const c = hcg[1] / 100;
+    const g = hcg[2] / 100;
+    if (c === 0) {
+      return [g * 255, g * 255, g * 255];
+    }
+    const pure = [0, 0, 0];
+    const hi = h % 1 * 6;
+    const v = hi % 1;
+    const w = 1 - v;
+    let mg = 0;
+    switch (Math.floor(hi)) {
+      case 0:
+        pure[0] = 1;
+        pure[1] = v;
+        pure[2] = 0;
+        break;
+      case 1:
+        pure[0] = w;
+        pure[1] = 1;
+        pure[2] = 0;
+        break;
+      case 2:
+        pure[0] = 0;
+        pure[1] = 1;
+        pure[2] = v;
+        break;
+      case 3:
+        pure[0] = 0;
+        pure[1] = w;
+        pure[2] = 1;
+        break;
+      case 4:
+        pure[0] = v;
+        pure[1] = 0;
+        pure[2] = 1;
+        break;
+      default:
+        pure[0] = 1;
+        pure[1] = 0;
+        pure[2] = w;
+    }
+    mg = (1 - c) * g;
+    return [
+      (c * pure[0] + mg) * 255,
+      (c * pure[1] + mg) * 255,
+      (c * pure[2] + mg) * 255
+    ];
+  };
+  convert.hcg.hsv = function(hcg) {
+    const c = hcg[1] / 100;
+    const g = hcg[2] / 100;
+    const v = c + g * (1 - c);
+    let f = 0;
+    if (v > 0) {
+      f = c / v;
+    }
+    return [hcg[0], f * 100, v * 100];
+  };
+  convert.hcg.hsl = function(hcg) {
+    const c = hcg[1] / 100;
+    const g = hcg[2] / 100;
+    const l = g * (1 - c) + 0.5 * c;
+    let s = 0;
+    if (l > 0 && l < 0.5) {
+      s = c / (2 * l);
+    } else if (l >= 0.5 && l < 1) {
+      s = c / (2 * (1 - l));
+    }
+    return [hcg[0], s * 100, l * 100];
+  };
+  convert.hcg.hwb = function(hcg) {
+    const c = hcg[1] / 100;
+    const g = hcg[2] / 100;
+    const v = c + g * (1 - c);
+    return [hcg[0], (v - c) * 100, (1 - v) * 100];
+  };
+  convert.hwb.hcg = function(hwb) {
+    const w = hwb[1] / 100;
+    const b = hwb[2] / 100;
+    const v = 1 - b;
+    const c = v - w;
+    let g = 0;
+    if (c < 1) {
+      g = (v - c) / (1 - c);
+    }
+    return [hwb[0], c * 100, g * 100];
+  };
+  convert.apple.rgb = function(apple) {
+    return [apple[0] / 65535 * 255, apple[1] / 65535 * 255, apple[2] / 65535 * 255];
+  };
+  convert.rgb.apple = function(rgb) {
+    return [rgb[0] / 255 * 65535, rgb[1] / 255 * 65535, rgb[2] / 255 * 65535];
+  };
+  convert.gray.rgb = function(args) {
+    return [args[0] / 100 * 255, args[0] / 100 * 255, args[0] / 100 * 255];
+  };
+  convert.gray.hsl = function(args) {
+    return [0, 0, args[0]];
+  };
+  convert.gray.hsv = convert.gray.hsl;
+  convert.gray.hwb = function(gray) {
+    return [0, 100, gray[0]];
+  };
+  convert.gray.cmyk = function(gray) {
+    return [0, 0, 0, gray[0]];
+  };
+  convert.gray.lab = function(gray) {
+    return [gray[0], 0, 0];
+  };
+  convert.gray.hex = function(gray) {
+    const val = Math.round(gray[0] / 100 * 255) & 255;
+    const integer = (val << 16) + (val << 8) + val;
+    const string = integer.toString(16).toUpperCase();
+    return "000000".substring(string.length) + string;
+  };
+  convert.rgb.gray = function(rgb) {
+    const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
+    return [val / 255 * 100];
+  };
+});
+
+// node_modules/color-convert/route.js
+var require_route = __commonJS((exports, module) => {
+  var conversions = require_conversions();
+  function buildGraph() {
+    const graph = {};
+    const models = Object.keys(conversions);
+    for (let len = models.length, i = 0;i < len; i++) {
+      graph[models[i]] = {
+        distance: -1,
+        parent: null
+      };
+    }
+    return graph;
+  }
+  function deriveBFS(fromModel) {
+    const graph = buildGraph();
+    const queue = [fromModel];
+    graph[fromModel].distance = 0;
+    while (queue.length) {
+      const current = queue.pop();
+      const adjacents = Object.keys(conversions[current]);
+      for (let len = adjacents.length, i = 0;i < len; i++) {
+        const adjacent = adjacents[i];
+        const node = graph[adjacent];
+        if (node.distance === -1) {
+          node.distance = graph[current].distance + 1;
+          node.parent = current;
+          queue.unshift(adjacent);
+        }
+      }
+    }
+    return graph;
+  }
+  function link(from, to) {
+    return function(args) {
+      return to(from(args));
+    };
+  }
+  function wrapConversion(toModel, graph) {
+    const path = [graph[toModel].parent, toModel];
+    let fn = conversions[graph[toModel].parent][toModel];
+    let cur = graph[toModel].parent;
+    while (graph[cur].parent) {
+      path.unshift(graph[cur].parent);
+      fn = link(conversions[graph[cur].parent][cur], fn);
+      cur = graph[cur].parent;
+    }
+    fn.conversion = path;
+    return fn;
+  }
+  module.exports = function(fromModel) {
+    const graph = deriveBFS(fromModel);
+    const conversion = {};
+    const models = Object.keys(graph);
+    for (let len = models.length, i = 0;i < len; i++) {
+      const toModel = models[i];
+      const node = graph[toModel];
+      if (node.parent === null) {
+        continue;
+      }
+      conversion[toModel] = wrapConversion(toModel, graph);
+    }
+    return conversion;
+  };
+});
+
+// node_modules/color-convert/index.js
+var require_color_convert = __commonJS((exports, module) => {
+  var conversions = require_conversions();
+  var route = require_route();
+  var convert = {};
+  var models = Object.keys(conversions);
+  function wrapRaw(fn) {
+    const wrappedFn = function(...args) {
+      const arg0 = args[0];
+      if (arg0 === undefined || arg0 === null) {
+        return arg0;
+      }
+      if (arg0.length > 1) {
+        args = arg0;
+      }
+      return fn(args);
+    };
+    if ("conversion" in fn) {
+      wrappedFn.conversion = fn.conversion;
+    }
+    return wrappedFn;
+  }
+  function wrapRounded(fn) {
+    const wrappedFn = function(...args) {
+      const arg0 = args[0];
+      if (arg0 === undefined || arg0 === null) {
+        return arg0;
+      }
+      if (arg0.length > 1) {
+        args = arg0;
+      }
+      const result = fn(args);
+      if (typeof result === "object") {
+        for (let len = result.length, i = 0;i < len; i++) {
+          result[i] = Math.round(result[i]);
+        }
+      }
+      return result;
+    };
+    if ("conversion" in fn) {
+      wrappedFn.conversion = fn.conversion;
+    }
+    return wrappedFn;
+  }
+  models.forEach((fromModel) => {
+    convert[fromModel] = {};
+    Object.defineProperty(convert[fromModel], "channels", { value: conversions[fromModel].channels });
+    Object.defineProperty(convert[fromModel], "labels", { value: conversions[fromModel].labels });
+    const routes = route(fromModel);
+    const routeModels = Object.keys(routes);
+    routeModels.forEach((toModel) => {
+      const fn = routes[toModel];
+      convert[fromModel][toModel] = wrapRounded(fn);
+      convert[fromModel][toModel].raw = wrapRaw(fn);
+    });
+  });
+  module.exports = convert;
+});
+
+// node_modules/css-filter-converter/lib/colorToFilter/colorToFilter.js
+var require_colorToFilter = __commonJS((exports) => {
+  var __importDefault = exports && exports.__importDefault || function(mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.ColorToFilter = undefined;
+  var errorHandling_1 = require_errorHandling();
+  var sheenUtil_1 = require_sheenUtil();
+  var colorTypes_1 = require_colorTypes();
+  var rgbToFilter_1 = require_rgbToFilter();
+  var colorParser_1 = require_colorParser();
+  var color_convert_1 = __importDefault(require_color_convert());
+
+  class ColorToFilter {
+    static rgbToFilter(rgbString, options) {
+      return rgbToFilter_1.RgbToFilter.convert({
+        colorString: rgbString,
+        validateAndParse: colorParser_1.ColorParser.validateAndParseRgb,
+        addSheen: sheenUtil_1.SheenUtil.parseSheenFromOptions(options)
+      });
+    }
+    static hexToFilter(hexString, options) {
+      return rgbToFilter_1.RgbToFilter.convert({
+        colorString: hexString,
+        validateAndParse: colorParser_1.ColorParser.validateAndParseHex,
+        convertToRgb: color_convert_1.default.hex.rgb,
+        addSheen: sheenUtil_1.SheenUtil.parseSheenFromOptions(options)
+      });
+    }
+    static hslToFilter(hslString, options) {
+      return rgbToFilter_1.RgbToFilter.convert({
+        colorString: hslString,
+        validateAndParse: colorParser_1.ColorParser.validateAndParseHsl,
+        convertToRgb: color_convert_1.default.hsl.rgb,
+        addSheen: sheenUtil_1.SheenUtil.parseSheenFromOptions(options)
+      });
+    }
+    static keywordToFilter(keyword, options) {
+      return rgbToFilter_1.RgbToFilter.convert({
+        colorString: keyword,
+        validateAndParse: colorParser_1.ColorParser.validateAndParseKeyword,
+        convertToRgb: color_convert_1.default.keyword.rgb,
+        conversionErrorMessage: errorHandling_1.ErrorHandling.generateInputErrorMessage(colorTypes_1.ColorTypes.KEYWORD, keyword),
+        addSheen: sheenUtil_1.SheenUtil.parseSheenFromOptions(options)
+      });
+    }
+  }
+  exports.ColorToFilter = ColorToFilter;
+});
+
+// node_modules/css-filter-converter/lib/filterToColor/filterToHex/workers/shared.js
+var require_shared = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.FilterToHexShared = undefined;
+  var errorHandling_1 = require_errorHandling();
+  var colorFormats_1 = require_colorFormats();
+  var colorTypes_1 = require_colorTypes();
+
+  class FilterToHexShared {
+    static generateInputErrorMessage(filterString) {
+      return errorHandling_1.ErrorHandling.generateInputErrorMessage(colorTypes_1.ColorTypes.FILTER, filterString, colorFormats_1.ColorFormats.FILTER);
+    }
+    static addSVGElementsToDOMAndValidateFilter(filterString, svgSideLength = 1) {
+      function createSVGElement() {
+        const xmlns = "http://www.w3.org/2000/svg";
+        const svgElement2 = document.createElementNS(xmlns, "svg");
+        svgElement2.style.height = "inherit";
+        svgElement2.style.width = "inherit";
+        svgElement2.style.float = "left";
+        svgElement2.style.filter = filterString;
+        const rect = document.createElementNS(xmlns, "rect");
+        rect.setAttributeNS(null, "width", svgSideLength.toString());
+        rect.setAttributeNS(null, "height", svgSideLength.toString());
+        svgElement2.appendChild(rect);
+        return svgElement2;
+      }
+      function createSVGContainerElement() {
+        const svgContainerElement2 = document.createElement("div");
+        svgContainerElement2.style.height = `${svgSideLength}px`;
+        svgContainerElement2.style.width = `${svgSideLength}px`;
+        svgContainerElement2.style.position = "absolute";
+        svgContainerElement2.style.top = "0px";
+        svgContainerElement2.style.left = "0px";
+        return svgContainerElement2;
+      }
+      const svgContainerElement = createSVGContainerElement();
+      const svgElement = createSVGElement();
+      if (svgElement.style.filter === "")
+        return { errorMessage: "error indicator", svgContainerElement };
+      svgContainerElement.appendChild(svgElement);
+      document.body.appendChild(svgContainerElement);
+      return { svgContainerElement };
+    }
+    static async getColorViaImageDataURL(base64EncodedDataURL) {
+      function rgbToHex(r, g, b) {
+        if (r > 255 || g > 255 || b > 255)
+          throw new Error("Invalid color component");
+        return (r << 16 | g << 8 | b).toString(16);
+      }
+      function getData(canvasElement2) {
+        const canvasStartCoordinate = 0;
+        const canvasFinalCoordinate = canvasElement2.width;
+        return canvasElement2.getContext("2d").getImageData(canvasStartCoordinate, canvasStartCoordinate, canvasFinalCoordinate, canvasFinalCoordinate).data;
+      }
+      function getCanvasHexColor(canvasElement2) {
+        const data = getData(canvasElement2);
+        const hex = rgbToHex(data[0], data[1], data[2]);
+        return `#${`000000${hex}`.slice(-6)}`;
+      }
+      function createCanvasElement(imageElement2) {
+        const canvasElement2 = document.createElement("canvas");
+        canvasElement2.width = imageElement2.width;
+        canvasElement2.height = imageElement2.height;
+        canvasElement2.getContext("2d").drawImage(imageElement2, 0, 0, imageElement2.width, imageElement2.height);
+        return canvasElement2;
+      }
+      async function createImage() {
+        const imageElement2 = new Image;
+        imageElement2.src = base64EncodedDataURL;
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(imageElement2));
+        });
+      }
+      const imageElement = await createImage();
+      const canvasElement = createCanvasElement(imageElement);
+      return getCanvasHexColor(canvasElement);
+    }
+  }
+  exports.FilterToHexShared = FilterToHexShared;
+});
+
+// node_modules/dom-to-image/src/dom-to-image.js
+var require_dom_to_image = __commonJS((exports, module) => {
+  (function(global) {
+    var util = newUtil();
+    var inliner = newInliner();
+    var fontFaces = newFontFaces();
+    var images = newImages();
+    var defaultOptions = {
+      imagePlaceholder: undefined,
+      cacheBust: false
+    };
+    var domtoimage = {
+      toSvg,
+      toPng,
+      toJpeg,
+      toBlob,
+      toPixelData,
+      impl: {
+        fontFaces,
+        images,
+        util,
+        inliner,
+        options: {}
+      }
+    };
+    if (typeof module !== "undefined")
+      module.exports = domtoimage;
+    else
+      global.domtoimage = domtoimage;
+    function toSvg(node, options) {
+      options = options || {};
+      copyOptions(options);
+      return Promise.resolve(node).then(function(node2) {
+        return cloneNode(node2, options.filter, true);
+      }).then(embedFonts).then(inlineImages).then(applyOptions).then(function(clone) {
+        return makeSvgDataUri(clone, options.width || util.width(node), options.height || util.height(node));
+      });
+      function applyOptions(clone) {
+        if (options.bgcolor)
+          clone.style.backgroundColor = options.bgcolor;
+        if (options.width)
+          clone.style.width = options.width + "px";
+        if (options.height)
+          clone.style.height = options.height + "px";
+        if (options.style)
+          Object.keys(options.style).forEach(function(property) {
+            clone.style[property] = options.style[property];
+          });
+        return clone;
+      }
+    }
+    function toPixelData(node, options) {
+      return draw(node, options || {}).then(function(canvas) {
+        return canvas.getContext("2d").getImageData(0, 0, util.width(node), util.height(node)).data;
+      });
+    }
+    function toPng(node, options) {
+      return draw(node, options || {}).then(function(canvas) {
+        return canvas.toDataURL();
+      });
+    }
+    function toJpeg(node, options) {
+      options = options || {};
+      return draw(node, options).then(function(canvas) {
+        return canvas.toDataURL("image/jpeg", options.quality || 1);
+      });
+    }
+    function toBlob(node, options) {
+      return draw(node, options || {}).then(util.canvasToBlob);
+    }
+    function copyOptions(options) {
+      if (typeof options.imagePlaceholder === "undefined") {
+        domtoimage.impl.options.imagePlaceholder = defaultOptions.imagePlaceholder;
+      } else {
+        domtoimage.impl.options.imagePlaceholder = options.imagePlaceholder;
+      }
+      if (typeof options.cacheBust === "undefined") {
+        domtoimage.impl.options.cacheBust = defaultOptions.cacheBust;
+      } else {
+        domtoimage.impl.options.cacheBust = options.cacheBust;
+      }
+    }
+    function draw(domNode, options) {
+      return toSvg(domNode, options).then(util.makeImage).then(util.delay(100)).then(function(image) {
+        var canvas = newCanvas(domNode);
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        return canvas;
+      });
+      function newCanvas(domNode2) {
+        var canvas = document.createElement("canvas");
+        canvas.width = options.width || util.width(domNode2);
+        canvas.height = options.height || util.height(domNode2);
+        if (options.bgcolor) {
+          var ctx = canvas.getContext("2d");
+          ctx.fillStyle = options.bgcolor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        return canvas;
+      }
+    }
+    function cloneNode(node, filter, root) {
+      if (!root && filter && !filter(node))
+        return Promise.resolve();
+      return Promise.resolve(node).then(makeNodeCopy).then(function(clone) {
+        return cloneChildren(node, clone, filter);
+      }).then(function(clone) {
+        return processClone(node, clone);
+      });
+      function makeNodeCopy(node2) {
+        if (node2 instanceof HTMLCanvasElement)
+          return util.makeImage(node2.toDataURL());
+        return node2.cloneNode(false);
+      }
+      function cloneChildren(original, clone, filter2) {
+        var children = original.childNodes;
+        if (children.length === 0)
+          return Promise.resolve(clone);
+        return cloneChildrenInOrder(clone, util.asArray(children), filter2).then(function() {
+          return clone;
+        });
+        function cloneChildrenInOrder(parent, children2, filter3) {
+          var done = Promise.resolve();
+          children2.forEach(function(child) {
+            done = done.then(function() {
+              return cloneNode(child, filter3);
+            }).then(function(childClone) {
+              if (childClone)
+                parent.appendChild(childClone);
+            });
+          });
+          return done;
+        }
+      }
+      function processClone(original, clone) {
+        if (!(clone instanceof Element))
+          return clone;
+        return Promise.resolve().then(cloneStyle).then(clonePseudoElements).then(copyUserInput).then(fixSvg).then(function() {
+          return clone;
+        });
+        function cloneStyle() {
+          copyStyle(window.getComputedStyle(original), clone.style);
+          function copyStyle(source, target) {
+            if (source.cssText)
+              target.cssText = source.cssText;
+            else
+              copyProperties(source, target);
+            function copyProperties(source2, target2) {
+              util.asArray(source2).forEach(function(name) {
+                target2.setProperty(name, source2.getPropertyValue(name), source2.getPropertyPriority(name));
+              });
+            }
+          }
+        }
+        function clonePseudoElements() {
+          [":before", ":after"].forEach(function(element) {
+            clonePseudoElement(element);
+          });
+          function clonePseudoElement(element) {
+            var style = window.getComputedStyle(original, element);
+            var content = style.getPropertyValue("content");
+            if (content === "" || content === "none")
+              return;
+            var className = util.uid();
+            clone.className = clone.className + " " + className;
+            var styleElement = document.createElement("style");
+            styleElement.appendChild(formatPseudoElementStyle(className, element, style));
+            clone.appendChild(styleElement);
+            function formatPseudoElementStyle(className2, element2, style2) {
+              var selector = "." + className2 + ":" + element2;
+              var cssText = style2.cssText ? formatCssText(style2) : formatCssProperties(style2);
+              return document.createTextNode(selector + "{" + cssText + "}");
+              function formatCssText(style3) {
+                var content2 = style3.getPropertyValue("content");
+                return style3.cssText + " content: " + content2 + ";";
+              }
+              function formatCssProperties(style3) {
+                return util.asArray(style3).map(formatProperty).join("; ") + ";";
+                function formatProperty(name) {
+                  return name + ": " + style3.getPropertyValue(name) + (style3.getPropertyPriority(name) ? " !important" : "");
+                }
+              }
+            }
+          }
+        }
+        function copyUserInput() {
+          if (original instanceof HTMLTextAreaElement)
+            clone.innerHTML = original.value;
+          if (original instanceof HTMLInputElement)
+            clone.setAttribute("value", original.value);
+        }
+        function fixSvg() {
+          if (!(clone instanceof SVGElement))
+            return;
+          clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+          if (!(clone instanceof SVGRectElement))
+            return;
+          ["width", "height"].forEach(function(attribute) {
+            var value = clone.getAttribute(attribute);
+            if (!value)
+              return;
+            clone.style.setProperty(attribute, value);
+          });
+        }
+      }
+    }
+    function embedFonts(node) {
+      return fontFaces.resolveAll().then(function(cssText) {
+        var styleNode = document.createElement("style");
+        node.appendChild(styleNode);
+        styleNode.appendChild(document.createTextNode(cssText));
+        return node;
+      });
+    }
+    function inlineImages(node) {
+      return images.inlineAll(node).then(function() {
+        return node;
+      });
+    }
+    function makeSvgDataUri(node, width, height) {
+      return Promise.resolve(node).then(function(node2) {
+        node2.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+        return new XMLSerializer().serializeToString(node2);
+      }).then(util.escapeXhtml).then(function(xhtml) {
+        return '<foreignObject x="0" y="0" width="100%" height="100%">' + xhtml + "</foreignObject>";
+      }).then(function(foreignObject) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' + foreignObject + "</svg>";
+      }).then(function(svg) {
+        return "data:image/svg+xml;charset=utf-8," + svg;
+      });
+    }
+    function newUtil() {
+      return {
+        escape,
+        parseExtension,
+        mimeType,
+        dataAsUrl,
+        isDataUrl,
+        canvasToBlob,
+        resolveUrl,
+        getAndEncode,
+        uid: uid(),
+        delay,
+        asArray,
+        escapeXhtml,
+        makeImage,
+        width,
+        height
+      };
+      function mimes() {
+        var WOFF = "application/font-woff";
+        var JPEG = "image/jpeg";
+        return {
+          woff: WOFF,
+          woff2: WOFF,
+          ttf: "application/font-truetype",
+          eot: "application/vnd.ms-fontobject",
+          png: "image/png",
+          jpg: JPEG,
+          jpeg: JPEG,
+          gif: "image/gif",
+          tiff: "image/tiff",
+          svg: "image/svg+xml"
+        };
+      }
+      function parseExtension(url) {
+        var match = /\.([^\.\/]*?)$/g.exec(url);
+        if (match)
+          return match[1];
+        else
+          return "";
+      }
+      function mimeType(url) {
+        var extension = parseExtension(url).toLowerCase();
+        return mimes()[extension] || "";
+      }
+      function isDataUrl(url) {
+        return url.search(/^(data:)/) !== -1;
+      }
+      function toBlob2(canvas) {
+        return new Promise(function(resolve) {
+          var binaryString = window.atob(canvas.toDataURL().split(",")[1]);
+          var length = binaryString.length;
+          var binaryArray = new Uint8Array(length);
+          for (var i = 0;i < length; i++)
+            binaryArray[i] = binaryString.charCodeAt(i);
+          resolve(new Blob([binaryArray], {
+            type: "image/png"
+          }));
+        });
+      }
+      function canvasToBlob(canvas) {
+        if (canvas.toBlob)
+          return new Promise(function(resolve) {
+            canvas.toBlob(resolve);
+          });
+        return toBlob2(canvas);
+      }
+      function resolveUrl(url, baseUrl) {
+        var doc = document.implementation.createHTMLDocument();
+        var base = doc.createElement("base");
+        doc.head.appendChild(base);
+        var a = doc.createElement("a");
+        doc.body.appendChild(a);
+        base.href = baseUrl;
+        a.href = url;
+        return a.href;
+      }
+      function uid() {
+        var index = 0;
+        return function() {
+          return "u" + fourRandomChars() + index++;
+          function fourRandomChars() {
+            return ("0000" + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4);
+          }
+        };
+      }
+      function makeImage(uri) {
+        return new Promise(function(resolve, reject) {
+          var image = new Image;
+          image.onload = function() {
+            resolve(image);
+          };
+          image.onerror = reject;
+          image.src = uri;
+        });
+      }
+      function getAndEncode(url) {
+        var TIMEOUT = 30000;
+        if (domtoimage.impl.options.cacheBust) {
+          url += (/\?/.test(url) ? "&" : "?") + new Date().getTime();
+        }
+        return new Promise(function(resolve) {
+          var request = new XMLHttpRequest;
+          request.onreadystatechange = done;
+          request.ontimeout = timeout;
+          request.responseType = "blob";
+          request.timeout = TIMEOUT;
+          request.open("GET", url, true);
+          request.send();
+          var placeholder;
+          if (domtoimage.impl.options.imagePlaceholder) {
+            var split = domtoimage.impl.options.imagePlaceholder.split(/,/);
+            if (split && split[1]) {
+              placeholder = split[1];
+            }
+          }
+          function done() {
+            if (request.readyState !== 4)
+              return;
+            if (request.status !== 200) {
+              if (placeholder) {
+                resolve(placeholder);
+              } else {
+                fail("cannot fetch resource: " + url + ", status: " + request.status);
+              }
+              return;
+            }
+            var encoder = new FileReader;
+            encoder.onloadend = function() {
+              var content = encoder.result.split(/,/)[1];
+              resolve(content);
+            };
+            encoder.readAsDataURL(request.response);
+          }
+          function timeout() {
+            if (placeholder) {
+              resolve(placeholder);
+            } else {
+              fail("timeout of " + TIMEOUT + "ms occured while fetching resource: " + url);
+            }
+          }
+          function fail(message) {
+            console.error(message);
+            resolve("");
+          }
+        });
+      }
+      function dataAsUrl(content, type) {
+        return "data:" + type + ";base64," + content;
+      }
+      function escape(string) {
+        return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+      }
+      function delay(ms) {
+        return function(arg) {
+          return new Promise(function(resolve) {
+            setTimeout(function() {
+              resolve(arg);
+            }, ms);
+          });
+        };
+      }
+      function asArray(arrayLike) {
+        var array = [];
+        var length = arrayLike.length;
+        for (var i = 0;i < length; i++)
+          array.push(arrayLike[i]);
+        return array;
+      }
+      function escapeXhtml(string) {
+        return string.replace(/#/g, "%23").replace(/\n/g, "%0A");
+      }
+      function width(node) {
+        var leftBorder = px(node, "border-left-width");
+        var rightBorder = px(node, "border-right-width");
+        return node.scrollWidth + leftBorder + rightBorder;
+      }
+      function height(node) {
+        var topBorder = px(node, "border-top-width");
+        var bottomBorder = px(node, "border-bottom-width");
+        return node.scrollHeight + topBorder + bottomBorder;
+      }
+      function px(node, styleProperty) {
+        var value = window.getComputedStyle(node).getPropertyValue(styleProperty);
+        return parseFloat(value.replace("px", ""));
+      }
+    }
+    function newInliner() {
+      var URL_REGEX = /url\(['"]?([^'"]+?)['"]?\)/g;
+      return {
+        inlineAll,
+        shouldProcess,
+        impl: {
+          readUrls,
+          inline
+        }
+      };
+      function shouldProcess(string) {
+        return string.search(URL_REGEX) !== -1;
+      }
+      function readUrls(string) {
+        var result = [];
+        var match;
+        while ((match = URL_REGEX.exec(string)) !== null) {
+          result.push(match[1]);
+        }
+        return result.filter(function(url) {
+          return !util.isDataUrl(url);
+        });
+      }
+      function inline(string, url, baseUrl, get) {
+        return Promise.resolve(url).then(function(url2) {
+          return baseUrl ? util.resolveUrl(url2, baseUrl) : url2;
+        }).then(get || util.getAndEncode).then(function(data) {
+          return util.dataAsUrl(data, util.mimeType(url));
+        }).then(function(dataUrl) {
+          return string.replace(urlAsRegex(url), "$1" + dataUrl + "$3");
+        });
+        function urlAsRegex(url2) {
+          return new RegExp(`(url\\(['"]?)(` + util.escape(url2) + `)(['"]?\\))`, "g");
+        }
+      }
+      function inlineAll(string, baseUrl, get) {
+        if (nothingToInline())
+          return Promise.resolve(string);
+        return Promise.resolve(string).then(readUrls).then(function(urls) {
+          var done = Promise.resolve(string);
+          urls.forEach(function(url) {
+            done = done.then(function(string2) {
+              return inline(string2, url, baseUrl, get);
+            });
+          });
+          return done;
+        });
+        function nothingToInline() {
+          return !shouldProcess(string);
+        }
+      }
+    }
+    function newFontFaces() {
+      return {
+        resolveAll,
+        impl: {
+          readAll
+        }
+      };
+      function resolveAll() {
+        return readAll(document).then(function(webFonts) {
+          return Promise.all(webFonts.map(function(webFont) {
+            return webFont.resolve();
+          }));
+        }).then(function(cssStrings) {
+          return cssStrings.join(`
+`);
+        });
+      }
+      function readAll() {
+        return Promise.resolve(util.asArray(document.styleSheets)).then(getCssRules).then(selectWebFontRules).then(function(rules) {
+          return rules.map(newWebFont);
+        });
+        function selectWebFontRules(cssRules) {
+          return cssRules.filter(function(rule) {
+            return rule.type === CSSRule.FONT_FACE_RULE;
+          }).filter(function(rule) {
+            return inliner.shouldProcess(rule.style.getPropertyValue("src"));
+          });
+        }
+        function getCssRules(styleSheets) {
+          var cssRules = [];
+          styleSheets.forEach(function(sheet) {
+            try {
+              util.asArray(sheet.cssRules || []).forEach(cssRules.push.bind(cssRules));
+            } catch (e) {
+              console.log("Error while reading CSS rules from " + sheet.href, e.toString());
+            }
+          });
+          return cssRules;
+        }
+        function newWebFont(webFontRule) {
+          return {
+            resolve: function resolve() {
+              var baseUrl = (webFontRule.parentStyleSheet || {}).href;
+              return inliner.inlineAll(webFontRule.cssText, baseUrl);
+            },
+            src: function() {
+              return webFontRule.style.getPropertyValue("src");
+            }
+          };
+        }
+      }
+    }
+    function newImages() {
+      return {
+        inlineAll,
+        impl: {
+          newImage
+        }
+      };
+      function newImage(element) {
+        return {
+          inline
+        };
+        function inline(get) {
+          if (util.isDataUrl(element.src))
+            return Promise.resolve();
+          return Promise.resolve(element.src).then(get || util.getAndEncode).then(function(data) {
+            return util.dataAsUrl(data, util.mimeType(element.src));
+          }).then(function(dataUrl) {
+            return new Promise(function(resolve, reject) {
+              element.onload = resolve;
+              element.onerror = reject;
+              element.src = dataUrl;
+            });
+          });
+        }
+      }
+      function inlineAll(node) {
+        if (!(node instanceof Element))
+          return Promise.resolve(node);
+        return inlineBackground(node).then(function() {
+          if (node instanceof HTMLImageElement)
+            return newImage(node).inline();
+          else
+            return Promise.all(util.asArray(node.childNodes).map(function(child) {
+              return inlineAll(child);
+            }));
+        });
+        function inlineBackground(node2) {
+          var background = node2.style.getPropertyValue("background");
+          if (!background)
+            return Promise.resolve(node2);
+          return inliner.inlineAll(background).then(function(inlined) {
+            node2.style.setProperty("background", inlined, node2.style.getPropertyPriority("background"));
+          }).then(function() {
+            return node2;
+          });
+        }
+      }
+    }
+  })(exports);
+});
+
+// node_modules/css-filter-converter/lib/filterToColor/filterToHex/workers/browser.js
+var require_browser = __commonJS((exports) => {
+  var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+    if (k2 === undefined)
+      k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() {
+        return m[k];
+      } };
+    }
+    Object.defineProperty(o, k2, desc);
+  } : function(o, m, k, k2) {
+    if (k2 === undefined)
+      k2 = k;
+    o[k2] = m[k];
+  });
+  var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+  } : function(o, v) {
+    o["default"] = v;
+  });
+  var __importStar = exports && exports.__importStar || function(mod) {
+    if (mod && mod.__esModule)
+      return mod;
+    var result = {};
+    if (mod != null) {
+      for (var k in mod)
+        if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+          __createBinding(result, mod, k);
+    }
+    __setModuleDefault(result, mod);
+    return result;
+  };
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.FilterToHexBrowser = undefined;
+  var errorHandling_1 = require_errorHandling();
+  var shared_1 = require_shared();
+
+  class FilterToHexBrowser extends shared_1.FilterToHexShared {
+    static cleanup(svgContainerElement) {
+      svgContainerElement.remove();
+    }
+    static returnInputError(filterString, svgContainerElement) {
+      const errorMessage = shared_1.FilterToHexShared.generateInputErrorMessage(filterString);
+      const errorResult = errorHandling_1.ErrorHandling.generateErrorResult(errorMessage);
+      FilterToHexBrowser.cleanup(svgContainerElement);
+      return errorResult;
+    }
+    static async getImageBase64ViaSVG(svgContainerElement) {
+      const domToImage = await Promise.resolve().then(() => __importStar(require_dom_to_image()));
+      return domToImage.toPng(svgContainerElement);
+    }
+    static async convert(filterString) {
+      const { errorMessage, svgContainerElement } = shared_1.FilterToHexShared.addSVGElementsToDOMAndValidateFilter(filterString);
+      if (errorMessage)
+        return FilterToHexBrowser.returnInputError(filterString, svgContainerElement);
+      const base64EncodedDataURL = await FilterToHexBrowser.getImageBase64ViaSVG(svgContainerElement);
+      const hexColor = await shared_1.FilterToHexShared.getColorViaImageDataURL(base64EncodedDataURL);
+      FilterToHexBrowser.cleanup(svgContainerElement);
+      return { color: hexColor };
+    }
+  }
+  exports.FilterToHexBrowser = FilterToHexBrowser;
+});
+
+// node_modules/css-filter-converter/lib/filterToColor/filterToHex/workers/node.js
+var require_node = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.FilterToHexNode = undefined;
+  var errorHandling_1 = require_errorHandling();
+  var errors_1 = require_errors();
+  var colorFormats_1 = require_colorFormats();
+  var colorTypes_1 = require_colorTypes();
+  var shared_1 = require_shared();
+
+  class FilterToHexNode extends shared_1.FilterToHexShared {
+    static cleanup(browser) {
+      if (FilterToHexNode.IS_HEADLESS)
+        browser === null || browser === undefined || browser.close();
+    }
+    static returnError(errorMsg, browser) {
+      const errorResult = errorHandling_1.ErrorHandling.generateErrorResult(errorMsg);
+      FilterToHexNode.cleanup(browser);
+      return errorResult;
+    }
+    static async getImageBase64ViaSVG(page) {
+      const endodedScreenshotData = await page.screenshot({ encoding: FilterToHexNode.BASE_64_ENCODING });
+      return `${FilterToHexNode.ENCODED_DATA_URL_PREFIX}${endodedScreenshotData}`;
+    }
+    static async openBrowserPage(browser) {
+      const page = await browser.newPage();
+      await page.setViewport({
+        width: FilterToHexNode.SVG_SIDE_LENGTH_PX,
+        height: FilterToHexNode.SVG_SIDE_LENGTH_PX
+      });
+      return page;
+    }
+    static async addSVGAndValidateFilter(page, filterString) {
+      const svgAddResult = await page.evaluate(shared_1.FilterToHexShared.addSVGElementsToDOMAndValidateFilter, filterString, FilterToHexNode.SVG_SIDE_LENGTH_PX);
+      if (svgAddResult.errorMessage) {
+        return {
+          errorMessage: errorHandling_1.ErrorHandling.generateInputErrorMessage(colorTypes_1.ColorTypes.FILTER, filterString, colorFormats_1.ColorFormats.FILTER)
+        };
+      }
+      return svgAddResult;
+    }
+    static async getPuppeteerDependency() {
+      try {
+        const pathPadding = "";
+        return __require("puppeteer" + pathPadding);
+      } catch (e) {
+        return { errorMessage: errors_1.MUST_INSTALL_PUPPETEER };
+      }
+    }
+    static async preparePuppeteerBrowser() {
+      const puppeteer = await FilterToHexNode.getPuppeteerDependency();
+      if (errorHandling_1.ErrorHandling.hasError(puppeteer))
+        return puppeteer;
+      return puppeteer.launch({ headless: FilterToHexNode.IS_HEADLESS });
+    }
+    static async convert(filterString) {
+      const browser = await FilterToHexNode.preparePuppeteerBrowser();
+      if (errorHandling_1.ErrorHandling.hasError(browser))
+        return FilterToHexNode.returnError(browser.errorMessage);
+      const page = await FilterToHexNode.openBrowserPage(browser);
+      const addSvgResult = await FilterToHexNode.addSVGAndValidateFilter(page, filterString);
+      if (errorHandling_1.ErrorHandling.hasError(addSvgResult))
+        return FilterToHexNode.returnError(addSvgResult.errorMessage, browser);
+      const base64EncodedDataURL = await FilterToHexNode.getImageBase64ViaSVG(page);
+      const hexColor = await page.evaluate(shared_1.FilterToHexShared.getColorViaImageDataURL, base64EncodedDataURL);
+      FilterToHexNode.cleanup(browser);
+      return { color: hexColor };
+    }
+  }
+  exports.FilterToHexNode = FilterToHexNode;
+  FilterToHexNode.BASE_64_ENCODING = "base64";
+  FilterToHexNode.ENCODED_DATA_URL_PREFIX = `data:image/png;${FilterToHexNode.BASE_64_ENCODING},`;
+  FilterToHexNode.IS_HEADLESS = true;
+  FilterToHexNode.SVG_SIDE_LENGTH_PX = 2;
+});
+
+// node_modules/css-filter-converter/lib/filterToColor/filterToHex/filterToHex.js
+var require_filterToHex = __commonJS((exports) => {
+  var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+    if (k2 === undefined)
+      k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() {
+        return m[k];
+      } };
+    }
+    Object.defineProperty(o, k2, desc);
+  } : function(o, m, k, k2) {
+    if (k2 === undefined)
+      k2 = k;
+    o[k2] = m[k];
+  });
+  var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+  } : function(o, v) {
+    o["default"] = v;
+  });
+  var __importStar = exports && exports.__importStar || function(mod) {
+    if (mod && mod.__esModule)
+      return mod;
+    var result = {};
+    if (mod != null) {
+      for (var k in mod)
+        if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+          __createBinding(result, mod, k);
+    }
+    __setModuleDefault(result, mod);
+    return result;
+  };
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.FilterToHex = undefined;
+  var errorHandling_1 = require_errorHandling();
+  var browser_1 = require_browser();
+
+  class FilterToHex {
+    static async convert(filterString, convertFromHex, options) {
+      try {
+        let result;
+        if (typeof window === "undefined") {
+          const { FilterToHexNode } = await Promise.resolve().then(() => __importStar(require_node()));
+          result = await FilterToHexNode.convert(filterString);
+        } else {
+          result = await browser_1.FilterToHexBrowser.convert(filterString);
+        }
+        if (result.color && convertFromHex && typeof result.color === "string") {
+          result.color = convertFromHex(result.color, options);
+        }
+        return result;
+      } catch (error) {
+        return errorHandling_1.ErrorHandling.generateUnexpectedError(error);
+      }
+    }
+  }
+  exports.FilterToHex = FilterToHex;
+});
+
+// node_modules/css-filter-converter/lib/shared/functionality/colorFormatter/colorFormatter.js
+var require_colorFormatter = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.ColorFormatter = undefined;
+
+  class ColorFormatter {
+    static arrayToRgbString(rgbArray) {
+      return `rgb(${rgbArray[0]}, ${rgbArray[1]}, ${rgbArray[2]})`;
+    }
+    static arrayToHslString(hslArray) {
+      return `hsl(${hslArray[0]}deg, ${hslArray[1]}%, ${hslArray[2]}%)`;
+    }
+  }
+  exports.ColorFormatter = ColorFormatter;
+});
+
+// node_modules/css-filter-converter/lib/filterToColor/hexToColor/hexToColor.js
+var require_hexToColor = __commonJS((exports) => {
+  var __importDefault = exports && exports.__importDefault || function(mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.HexToColor = undefined;
+  var colorFormatter_1 = require_colorFormatter();
+  var color_convert_1 = __importDefault(require_color_convert());
+
+  class HexToColor {
+    static convertToRgb(color, options) {
+      const result = color_convert_1.default.hex.rgb(color);
+      return (options === null || options === undefined ? undefined : options.resultType) === "string" ? colorFormatter_1.ColorFormatter.arrayToRgbString(result) : result;
+    }
+    static convertToHsl(color, options) {
+      const result = color_convert_1.default.hex.hsl(color);
+      return (options === null || options === undefined ? undefined : options.resultType) === "string" ? colorFormatter_1.ColorFormatter.arrayToHslString(result) : result;
+    }
+  }
+  exports.HexToColor = HexToColor;
+});
+
+// node_modules/css-filter-converter/lib/filterToColor/filterToColor.js
+var require_filterToColor = __commonJS((exports) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.FilterToColor = undefined;
+  var filterToHex_1 = require_filterToHex();
+  var hexToColor_1 = require_hexToColor();
+
+  class FilterToColor {
+    static async filterToHex(filterString) {
+      const result = await filterToHex_1.FilterToHex.convert(filterString);
+      if (result.color)
+        result.color = result.color.toUpperCase();
+      return result;
+    }
+    static async filterToRgb(filterString, options) {
+      return filterToHex_1.FilterToHex.convert(filterString, hexToColor_1.HexToColor.convertToRgb, options);
+    }
+    static async filterToHsl(filterString, options) {
+      return filterToHex_1.FilterToHex.convert(filterString, hexToColor_1.HexToColor.convertToHsl, options);
+    }
+  }
+  exports.FilterToColor = FilterToColor;
+});
+
+// node_modules/css-filter-converter/lib/index.js
+var require_lib = __commonJS((exports, module) => {
+  Object.defineProperty(exports, "__esModule", { value: true });
+  var colorToFilter_1 = require_colorToFilter();
+  var filterToColor_1 = require_filterToColor();
+
+  class CssFilterConverter {
+    static rgbToFilter(rgbString, options) {
+      return colorToFilter_1.ColorToFilter.rgbToFilter(rgbString, options);
+    }
+    static hexToFilter(hexString, options) {
+      return colorToFilter_1.ColorToFilter.hexToFilter(hexString, options);
+    }
+    static hslToFilter(hslString, options) {
+      return colorToFilter_1.ColorToFilter.hslToFilter(hslString, options);
+    }
+    static keywordToFilter(keyword, options) {
+      return colorToFilter_1.ColorToFilter.keywordToFilter(keyword, options);
+    }
+    static async filterToHex(filterString) {
+      return filterToColor_1.FilterToColor.filterToHex(filterString);
+    }
+    static async filterToRgb(filterString, options) {
+      return filterToColor_1.FilterToColor.filterToRgb(filterString, options);
+    }
+    static async filterToHsl(filterString, options) {
+      return filterToColor_1.FilterToColor.filterToHsl(filterString, options);
+    }
+  }
+  exports.default = CssFilterConverter;
+  module.exports = CssFilterConverter;
+});
+
 // node_modules/audiomotion-analyzer/src/audioMotion-analyzer.js
 var VERSION = "4.5.4";
 var PI = Math.PI;
@@ -1716,6 +4122,7 @@ function entries(object) {
 }
 
 // src/index.ts
+var import_css_filter_converter = __toESM(require_lib(), 1);
 var soundEffects = {};
 var DEFAULT_MUSIC_PLAYER_STATE = {
   source: new Audio
@@ -1771,11 +4178,23 @@ The selector '${options.selector}' returned no results.`);
                     <!-- <div class="slider-track"></div> -->
                 </div>
             </span>
-            <button class="play-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/></svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M176 96C149.5 96 128 117.5 128 144L128 496C128 522.5 149.5 544 176 544L240 544C266.5 544 288 522.5 288 496L288 144C288 117.5 266.5 96 240 96L176 96zM400 96C373.5 96 352 117.5 352 144L352 496C352 522.5 373.5 544 400 544L464 544C490.5 544 512 522.5 512 496L512 144C512 117.5 490.5 96 464 96L400 96z"/></svg>
-                <div id="spectrum"></div>
-            </button>
+            <span>
+                <button class="prev-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M176 96C149.5 96 128 117.5 128 144L128 496C128 522.5 149.5 544 176 544L240 544C266.5 544 288 522.5 288 496L288 144C288 117.5 266.5 96 240 96L176 96zM400 96C373.5 96 352 117.5 352 144L352 496C352 522.5 373.5 544 400 544L464 544C490.5 544 512 522.5 512 496L512 144C512 117.5 490.5 96 464 96L400 96z"/></svg>
+                    <div id="spectrum"></div>
+                </button>
+                <button class="play-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M176 96C149.5 96 128 117.5 128 144L128 496C128 522.5 149.5 544 176 544L240 544C266.5 544 288 522.5 288 496L288 144C288 117.5 266.5 96 240 96L176 96zM400 96C373.5 96 352 117.5 352 144L352 496C352 522.5 373.5 544 400 544L464 544C490.5 544 512 522.5 512 496L512 144C512 117.5 490.5 96 464 96L400 96z"/></svg>
+                    <div id="spectrum"></div>
+                </button>
+                <button class="next-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M176 96C149.5 96 128 117.5 128 144L128 496C128 522.5 149.5 544 176 544L240 544C266.5 544 288 522.5 288 496L288 144C288 117.5 266.5 96 240 96L176 96zM400 96C373.5 96 352 117.5 352 144L352 496C352 522.5 373.5 544 400 544L464 544C490.5 544 512 522.5 512 496L512 144C512 117.5 490.5 96 464 96L400 96z"/></svg>
+                    <div id="spectrum"></div>
+                </button>
+            </span>
             <span>
                 <button class="random-button">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 160C544 124.7 515.3 96 480 96L160 96zM224 192C241.7 192 256 206.3 256 224C256 241.7 241.7 256 224 256C206.3 256 192 241.7 192 224C192 206.3 206.3 192 224 192zM192 416C192 398.3 206.3 384 224 384C241.7 384 256 398.3 256 416C256 433.7 241.7 448 224 448C206.3 448 192 433.7 192 416zM320 288C337.7 288 352 302.3 352 320C352 337.7 337.7 352 320 352C302.3 352 288 337.7 288 320C288 302.3 302.3 288 320 288zM384 224C384 206.3 398.3 192 416 192C433.7 192 448 206.3 448 224C448 241.7 433.7 256 416 256C398.3 256 384 241.7 384 224zM416 384C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448C398.3 448 384 433.7 384 416C384 398.3 398.3 384 416 384z"/></svg>
@@ -1790,6 +4209,13 @@ The selector '${options.selector}' returned no results.`);
                 <p id="total-time">0:00</p>
             </span>
         `;
+    if (options.colors) {
+      entries(options.colors).forEach(([colorName, value]) => {
+        if (!value)
+          return;
+        section.style.setProperty(`--${colorName}`, value);
+      });
+    }
     const link = document.createElement("link");
     link.href = asset("./styles.css");
     link.type = "text/css";
@@ -1802,7 +4228,12 @@ The selector '${options.selector}' returned no results.`);
     link.addEventListener("load", () => {
       section.style.visibility = "";
     });
-    this.visualizer = new audioMotion_analyzer_default(exists(this.root.getElementById("spectrum")), {
+    const spectrum = exists(this.root.getElementById("spectrum"));
+    if (options.colors?.foreground) {
+      const result = import_css_filter_converter.default.hexToFilter(options.colors.foreground);
+      spectrum.style.setProperty("filter", result.color);
+    }
+    this.visualizer = new audioMotion_analyzer_default(spectrum, {
       source: this.state.source,
       showBgColor: false,
       overlay: true,

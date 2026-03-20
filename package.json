@@ -18,7 +18,8 @@
         "typescript": "^5"
     },
     "dependencies": {
-        "audiomotion-analyzer": "^4.5.4"
+        "audiomotion-analyzer": "^4.5.4",
+        "css-filter-converter": "^1.0.110"
     },
     "lint-staged": {
         "*": [

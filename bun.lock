@@ -6,6 +6,7 @@
       "name": "html-audio-player",
       "dependencies": {
         "audiomotion-analyzer": "^4.5.4",
+        "css-filter-converter": "^1.0.110",
       },
       "devDependencies": {
         "@alik6/bun-copy-plugin": "^0.0.10",
@@ -61,7 +62,11 @@
 
     "corser": ["corser@2.0.1", "", {}, "sha512-utCYNzRSQIZNPIcGZdQc92UVJYAhtGAteCFg0yRaFm8f0P+CPtyGyHXJcGXnffjCybUCEx3FQ2G7U3/o9eIkVQ=="],
 
+    "css-filter-converter": ["css-filter-converter@1.0.110", "", { "dependencies": { "color-convert": "^2.0.1", "dom-to-image": "^2.6.0" } }, "sha512-C5ByBQubCmJXh+kBzx3CESEtCbOTMUliyzBSJF0hsnqsbpCdqPrJYvsPMnFBCZNlxR+YNJFoYO+Fj/rvNZv5CA=="],
+
     "debug": ["debug@4.4.3", "", { "dependencies": { "ms": "^2.1.3" } }, "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA=="],
+
+    "dom-to-image": ["dom-to-image@2.6.0", "", {}, "sha512-Dt0QdaHmLpjURjU7Tnu3AgYSF2LuOmksSGsUcE6ItvJoCWTBEmiMXcqBdNSAm9+QbbwD7JMoVsuuKX6ZVQv1qA=="],
 
     "dunder-proto": ["dunder-proto@1.0.1", "", { "dependencies": { "call-bind-apply-helpers": "^1.0.1", "es-errors": "^1.3.0", "gopd": "^1.2.0" } }, "sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A=="],
 
