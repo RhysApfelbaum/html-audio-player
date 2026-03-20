@@ -69,6 +69,37 @@ section #time-controls p {
   margin: 0 1rem;
 }
 
+section #transport-controls {
+  display: flex;
+  flex-direction: row;
+}
+
+section #transport-controls #next-button svg {
+  fill: var(--foreground);
+  width: 2rem;
+  margin: 0 1rem;
+  transition: all .3s;
+}
+
+section #transport-controls #next-button:hover svg {
+  fill: var(--highlight);
+  margin: 0 1rem;
+  transform: scale(1.2);
+}
+
+section #transport-controls #prev-button svg {
+  fill: var(--foreground);
+  width: 2rem;
+  margin: 0 1rem;
+  transition: all .3s;
+}
+
+section #transport-controls #prev-button:hover svg {
+  fill: var(--highlight);
+  margin: 0 1rem;
+  transform: scale(1.2);
+}
+
 section .slider {
   position: relative;
   margin: 0;

@@ -59,9 +59,28 @@ section {
         }
     }
 
-    /* div.slider { */
-    /*     appearance: none; */
-    /* } */
+    #transport-controls {
+        display: flex;
+        flex-direction: row;
+
+        #next-button,
+        #prev-button {
+            svg {
+                width: 2rem;
+                fill: var(--foreground);
+                transition: all 0.3s;
+                margin: 0 1rem;
+            }
+
+            &:hover {
+                svg {
+                    transform: scale(1.2);
+                    fill: var(--highlight);
+                    margin: 0 1rem;
+                }
+            }
+        }
+    }
 
     .slider {
         margin: 0;
