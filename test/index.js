@@ -4124,9 +4124,6 @@ function entries(object) {
 // src/index.ts
 var import_css_filter_converter = __toESM(require_lib(), 1);
 var soundEffects = {};
-var DEFAULT_MUSIC_PLAYER_STATE = {
-  source: new Audio
-};
 
 class MusicPlayer {
   playPause;
@@ -4141,11 +4138,17 @@ class MusicPlayer {
   soundEffects;
   root;
   constructor(options) {
+    const noOp = () => {};
     this.state = {
-      ...DEFAULT_MUSIC_PLAYER_STATE,
+      onNextTrack: noOp,
+      onPreviousTrack: noOp,
       ...options.state
     };
-    this.state.source.addEventListener("ended", () => this.pause());
+    this.state.source.addEventListener("ended", () => {
+      const ended = this.state.onTrackEnded || noOp;
+      this.pause();
+      ended();
+    });
     this.soundEffects = {};
     entries(MusicPlayer.SOUND_EFFECT_URLS).forEach(([key, url]) => {
       this.soundEffects[key] = new Audio(url);
@@ -4161,11 +4164,10 @@ The selector '${options.selector}' returned no results.`);
     }
     this.root = options.container.attachShadow({ mode: "open" });
     this.root.innerHTML = `
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet"
-
-`;
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet"
+        `;
     const section = document.createElement("section");
     section.style.visibility = "hidden";
     section.innerHTML = `
@@ -4178,15 +4180,15 @@ The selector '${options.selector}' returned no results.`);
                 </div>
             </span>
             <span id="transport-controls">
-                <button id="prev-button">
+                <button id="prev-button" class="clicky">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M491 100.8C478.1 93.8 462.3 94.5 450 102.6L192 272.1L192 128C192 110.3 177.7 96 160 96C142.3 96 128 110.3 128 128L128 512C128 529.7 142.3 544 160 544C177.7 544 192 529.7 192 512L192 367.9L450 537.5C462.3 545.6 478 546.3 491 539.3C504 532.3 512 518.8 512 504.1L512 136.1C512 121.4 503.9 107.9 491 100.9z"/></svg>
                 </button>
-                <button class="play-button">
+                <button id="play-button" class="play-button clicky">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M187.2 100.9C174.8 94.1 159.8 94.4 147.6 101.6C135.4 108.8 128 121.9 128 136L128 504C128 518.1 135.5 531.2 147.6 538.4C159.7 545.6 174.8 545.9 187.2 539.1L523.2 355.1C536 348.1 544 334.6 544 320C544 305.4 536 291.9 523.2 284.9L187.2 100.9z"/></svg>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M176 96C149.5 96 128 117.5 128 144L128 496C128 522.5 149.5 544 176 544L240 544C266.5 544 288 522.5 288 496L288 144C288 117.5 266.5 96 240 96L176 96zM400 96C373.5 96 352 117.5 352 144L352 496C352 522.5 373.5 544 400 544L464 544C490.5 544 512 522.5 512 496L512 144C512 117.5 490.5 96 464 96L400 96z"/></svg>
                     <div id="spectrum"></div>
                 </button>
-                <button id="next-button">
+                <button id="next-button" class="clicky">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M149 100.8C161.9 93.8 177.7 94.5 190 102.6L448 272.1L448 128C448 110.3 462.3 96 480 96C497.7 96 512 110.3 512 128L512 512C512 529.7 497.7 544 480 544C462.3 544 448 529.7 448 512L448 367.9L190 537.5C177.7 545.6 162 546.3 149 539.3C136 532.3 128 518.7 128 504L128 136C128 121.3 136.1 107.8 149 100.8z"/></svg>
                 </button>
             </span>
@@ -4195,11 +4197,12 @@ The selector '${options.selector}' returned no results.`);
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 160C544 124.7 515.3 96 480 96L160 96zM224 192C241.7 192 256 206.3 256 224C256 241.7 241.7 256 224 256C206.3 256 192 241.7 192 224C192 206.3 206.3 192 224 192zM192 416C192 398.3 206.3 384 224 384C241.7 384 256 398.3 256 416C256 433.7 241.7 448 224 448C206.3 448 192 433.7 192 416zM320 288C337.7 288 352 302.3 352 320C352 337.7 337.7 352 320 352C302.3 352 288 337.7 288 320C288 302.3 302.3 288 320 288zM384 224C384 206.3 398.3 192 416 192C433.7 192 448 206.3 448 224C448 241.7 433.7 256 416 256C398.3 256 384 241.7 384 224zM416 384C433.7 384 448 398.3 448 416C448 433.7 433.7 448 416 448C398.3 448 384 433.7 384 416C384 398.3 398.3 384 416 384z"/></svg>
                 </button>
             </span>
+            <label for="play-button">
+            </label>
             <span id="time-controls">
                 <p id="current-time">0:00</p>
                 <div class="slider">
                     <input type="range" id="seek" value="0">
-                    <!-- <div class="slider-track"></div> -->
                 </div>
                 <p id="total-time">0:00</p>
             </span>
@@ -4244,7 +4247,6 @@ The selector '${options.selector}' returned no results.`);
     volume.addEventListener("input", () => {
       this.state.source.volume = volume.valueAsNumber / 100;
     });
-    const volumeButton = exists(this.root.querySelector(".volume-button"));
     const volumeControls = exists(this.root.querySelector("#volume-controls"));
     volumeControls.addEventListener("focusin", () => {
       volumeControls.classList.add("visible");
@@ -4267,6 +4269,7 @@ The selector '${options.selector}' returned no results.`);
     const seekBar = exists(this.root.querySelector("#seek"));
     this.state.source.addEventListener("loadedmetadata", () => {
       if (!Number.isFinite(this.state.source.duration)) {
+        seekBar.setAttribute("disabled", "true");
         seekBar.style.cursor = "not-allowed";
       }
       exists(this.root.querySelector("#total-time")).innerHTML = this.clockDisplay(this.state.source.duration);
@@ -4281,16 +4284,29 @@ The selector '${options.selector}' returned no results.`);
     });
     this.playPause = exists(this.root.querySelector(".play-button"));
     this.playPause.addEventListener("click", () => this.toggle());
-    this.playPause.addEventListener("click", () => this.soundEffects.buttonClick?.play());
+    this.root.querySelectorAll(".clicky").forEach((element) => {
+      console.log("hi");
+      element.addEventListener("click", () => {
+        this.soundEffects.buttonClick?.play();
+      });
+      mouseEnterLeave({
+        element,
+        hoverTime: 100,
+        callback: () => {
+          this.soundEffects.buttonHover?.play();
+        }
+      });
+    });
+    this.root.querySelector("#next-button")?.addEventListener("click", () => {
+      const nextTrack = this.state.onNextTrack || noOp;
+      nextTrack();
+    });
+    this.root.querySelector("#prev-button")?.addEventListener("click", () => {
+      const prevTrack = this.state.onPreviousTrack || noOp;
+      prevTrack();
+    });
     this.reroll = exists(this.root.querySelector(".random-button"));
     this.reroll.addEventListener("click", () => this.soundEffects.diceRoll?.play());
-    mouseEnterLeave({
-      element: this.playPause,
-      hoverTime: 100,
-      callback: () => {
-        this.soundEffects.buttonHover?.play();
-      }
-    });
     mouseEnterLeave({
       element: this.reroll,
       hoverTime: 100,

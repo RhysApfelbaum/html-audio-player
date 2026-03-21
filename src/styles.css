@@ -194,8 +194,6 @@ section {
                 fill: var(--foreground);
             }
 
-            margin-right: 1rem;
-
             &:hover {
                 svg {
                     transform: translateY(-0.5rem) rotate(360deg) scale(1.2);

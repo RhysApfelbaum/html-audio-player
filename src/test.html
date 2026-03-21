@@ -10,6 +10,8 @@
                 selector: 'div',
                 state: {
                     source: audio,
+                    onNextTrack: () => console.log('next'),
+                    onPreviousTrack: () => console.log('previous'),
                 },
                 colors: {
                     foreground: '#800',

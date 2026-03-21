@@ -197,10 +197,6 @@ section button.play-button #spectrum {
   left: -50%;
 }
 
-section button.random-button {
-  margin-right: 1rem;
-}
-
 section button.random-button svg {
   fill: var(--foreground);
   width: 2rem;
